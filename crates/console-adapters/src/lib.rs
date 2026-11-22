@@ -2,4 +2,5 @@
 //! assumed present; callers verify by handshake (see `ftp::probe`) before capabilities turn on.
 
 pub mod ftp;
+pub mod ops;
 pub mod paths;

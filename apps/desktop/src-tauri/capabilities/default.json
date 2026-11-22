@@ -29,6 +29,26 @@
     "allow-save-theme",
     "allow-delete-theme",
     "allow-export-theme",
-    "allow-import-theme"
+    "allow-import-theme",
+    "allow-files-connect",
+    "allow-files-disconnect",
+    "allow-files-list-remote",
+    "allow-files-list-local",
+    "allow-files-set-write-lock",
+    "allow-files-plan",
+    "allow-files-apply",
+    "allow-files-cancel",
+    "allow-files-download",
+    "allow-backup-create",
+    "allow-backup-list",
+    "allow-backup-verify",
+    "allow-backup-delete",
+    "allow-backup-restore-item",
+    "allow-backup-save-item-as",
+    "allow-hb-pick-and-scan",
+    "allow-hb-verify",
+    "allow-hb-upload-op",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten"
   ]
 }

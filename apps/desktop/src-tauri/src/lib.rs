@@ -1,4 +1,7 @@
+mod backups_cmd;
 mod commands;
+mod files;
+mod homebrew;
 
 pub fn run() {
     let state = commands::AppState::open().expect("could not open application database");
@@ -29,6 +32,24 @@ pub fn run() {
             commands::delete_theme,
             commands::export_theme,
             commands::import_theme,
+            files::files_connect,
+            files::files_disconnect,
+            files::files_list_remote,
+            files::files_list_local,
+            files::files_set_write_lock,
+            files::files_plan,
+            files::files_apply,
+            files::files_cancel,
+            files::files_download,
+            backups_cmd::backup_create,
+            backups_cmd::backup_list,
+            backups_cmd::backup_verify,
+            backups_cmd::backup_delete,
+            backups_cmd::backup_restore_item,
+            backups_cmd::backup_save_item_as,
+            homebrew::hb_pick_and_scan,
+            homebrew::hb_verify,
+            homebrew::hb_upload_op,
         ])
         .run(tauri::generate_context!())
         .expect("error while running PS4 Studio");

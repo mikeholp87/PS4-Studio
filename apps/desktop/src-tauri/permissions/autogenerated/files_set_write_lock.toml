@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-files-set-write-lock"
+description = "Enables the files_set_write_lock command without any pre-configured scope."
+commands.allow = ["files_set_write_lock"]
+
+[[permission]]
+identifier = "deny-files-set-write-lock"
+description = "Denies the files_set_write_lock command without any pre-configured scope."
+commands.deny = ["files_set_write_lock"]

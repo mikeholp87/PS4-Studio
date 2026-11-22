@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-backup-save-item-as"
+description = "Enables the backup_save_item_as command without any pre-configured scope."
+commands.allow = ["backup_save_item_as"]
+
+[[permission]]
+identifier = "deny-backup-save-item-as"
+description = "Denies the backup_save_item_as command without any pre-configured scope."
+commands.deny = ["backup_save_item_as"]

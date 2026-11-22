@@ -14,17 +14,18 @@ use std::time::Duration;
 use tauri::State;
 
 pub struct AppState {
-    db: Mutex<Db>,
-    session: Mutex<Option<Session>>,
+    pub(crate) db: Mutex<Db>,
+    pub(crate) session: Mutex<Option<Session>>,
     remote_play: Mutex<Option<ps4studio_remote_play::Session>>,
+    pub(crate) files: crate::files::FileState,
 }
 
-struct Session {
-    address: Option<IpAddr>,
+pub(crate) struct Session {
+    pub(crate) address: Option<IpAddr>,
     last_probe_error: Option<String>,
     profile: ConsoleProfile,
-    facts: Facts,
-    scenario_id: Option<&'static str>,
+    pub(crate) facts: Facts,
+    pub(crate) scenario_id: Option<&'static str>,
 }
 
 impl AppState {
@@ -35,6 +36,7 @@ impl AppState {
             db: Mutex::new(db),
             session: Mutex::new(None),
             remote_play: Mutex::new(None),
+            files: Default::default(),
         })
     }
 }
@@ -54,7 +56,7 @@ pub struct ConnectionView {
     capabilities: Vec<CapabilityEntry>,
 }
 
-fn view(s: &Session) -> ConnectionView {
+pub(crate) fn view(s: &Session) -> ConnectionView {
     ConnectionView {
         profile: s.profile.clone(),
         scenario_id: s.scenario_id,
@@ -63,7 +65,7 @@ fn view(s: &Session) -> ConnectionView {
     }
 }
 
-fn lock<T>(m: &Mutex<T>) -> Result<std::sync::MutexGuard<'_, T>, String> {
+pub(crate) fn lock<T>(m: &Mutex<T>) -> Result<std::sync::MutexGuard<'_, T>, String> {
     m.lock().map_err(|_| "internal state poisoned".to_string())
 }
 
@@ -86,6 +88,7 @@ pub fn connect_simulator(
     state: State<AppState>,
     scenario_id: String,
 ) -> Result<ConnectionView, String> {
+    state.files.reset();
     let sc = ps4studio_mock_console::scenario(&scenario_id).ok_or("Unknown simulator scenario.")?;
     let fw = Firmware {
         value: sc.reported_firmware.map(str::to_owned),
@@ -125,6 +128,7 @@ pub fn connect_simulator(
 
 #[tauri::command]
 pub fn disconnect(state: State<AppState>) -> Result<(), String> {
+    state.files.reset();
     if lock(&state.session)?.take().is_some() {
         lock(&state.db)?
             .audit("disconnect", "-", "", "ok")
@@ -199,7 +203,7 @@ pub fn delete_profile(state: State<AppState>, id: i64) -> Result<bool, String> {
 }
 
 /// Only these keys can be read/written from the webview, each with a validator.
-fn setting_ok(key: &str, value: &str) -> bool {
+pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
     match key {
         "theme" => matches!(value, "dark" | "light" | "system"),
         "accent" => {
@@ -208,6 +212,10 @@ fn setting_ok(key: &str, value: &str) -> bool {
                 && value[1..].chars().all(|c| c.is_ascii_hexdigit())
         }
         "first_run_done" => matches!(value, "0" | "1"),
+        "ftp_port" => value.parse::<u16>().is_ok_and(|p| p > 0),
+        "trusted_publishers" => {
+            value.len() <= 400 && value.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, ' ' | '.' | '_' | '-' | ','))
+        }
         "chiaki_nickname" => ps4studio_remote_play::LaunchSpec {
             nickname: value.to_owned(),
             host: IpAddr::from([0, 0, 0, 0]),

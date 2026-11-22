@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-hb-upload-op"
+description = "Enables the hb_upload_op command without any pre-configured scope."
+commands.allow = ["hb_upload_op"]
+
+[[permission]]
+identifier = "deny-hb-upload-op"
+description = "Denies the hb_upload_op command without any pre-configured scope."
+commands.deny = ["hb_upload_op"]

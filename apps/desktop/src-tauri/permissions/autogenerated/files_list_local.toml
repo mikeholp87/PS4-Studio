@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-files-list-local"
+description = "Enables the files_list_local command without any pre-configured scope."
+commands.allow = ["files_list_local"]
+
+[[permission]]
+identifier = "deny-files-list-local"
+description = "Denies the files_list_local command without any pre-configured scope."
+commands.deny = ["files_list_local"]

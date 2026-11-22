@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-hb-pick-and-scan"
+description = "Enables the hb_pick_and_scan command without any pre-configured scope."
+commands.allow = ["hb_pick_and_scan"]
+
+[[permission]]
+identifier = "deny-hb-pick-and-scan"
+description = "Denies the hb_pick_and_scan command without any pre-configured scope."
+commands.deny = ["hb_pick_and_scan"]

@@ -24,7 +24,13 @@ ps4studio-remote-play = { path = "../../../crates/remote-play" }
 ps4studio-diagnostics = { path = "../../../crates/diagnostics" }
 tokio.workspace = true
 tauri-plugin-dialog = "2"
+ps4studio-console-adapters = { path = "../../../crates/console-adapters" }
+ps4studio-backups = { path = "../../../crates/backups" }
+sha2 = "0.10"
 
 [package.metadata.deb]
 name = "ps4-studio"
 section = "utils"
+
+[dev-dependencies]
+tempfile = "3"
