@@ -1,6 +1,6 @@
 <script lang="ts">
   import { app, sections } from '../app.svelte'
-  const title = $derived(sections.find((s) => s.id === app.section)?.label ?? '')
+  const title = $derived(app.section === 'lab' ? 'Console UI simulation' : (sections.find((s) => s.id === app.section)?.label ?? ''))
   const answered = $derived(app.connection?.capabilities.find((c) => c.capability === 'console.basic_status')?.status === 'available')
   const status = $derived(
     !app.connection ? { text: 'Not connected', cls: 'off' }

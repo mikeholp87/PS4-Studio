@@ -31,6 +31,11 @@
     <p class="hint">PS4 Studio is an independent project and is not endorsed by Sony Interactive Entertainment.</p>
   </Card>
 
+  <Card title="Experimental">
+    <p class="hint">A research workstream, kept separate from everything else. The Console UI simulation shows what a custom, controller-driven console shell could feel like. It is a demo on your computer: it does not run on a PS4, does not replace any operating system, and uses only invented demo data. See <code>docs/alternative-os-research.md</code>.</p>
+    <button onclick={() => app.go('lab')}>Open console UI simulation</button>
+  </Card>
+
   <Card title="Activity log">
     {#if audit.length === 0}<p class="hint">Nothing recorded yet.</p>{:else}
       <table>

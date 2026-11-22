@@ -151,6 +151,62 @@ test('Studio: send a theme to the companion (pair, then send), with honest warni
   await expect(dlg.getByText('Theme sent.')).toBeVisible()
 })
 
+test.describe('Console UI simulation (experimental track)', () => {
+  test.beforeEach(async ({ page }) => {
+    await nav(page, 'Settings').click()
+    await page.getByRole('button', { name: 'Open console UI simulation' }).click()
+  })
+
+  test('is loudly labelled as a simulation and navigable by keyboard', async ({ page }) => {
+    await expect(page.getByText(/SIMULATION · not an operating system/)).toBeVisible()
+    const tv = page.getByRole('application', { name: /Console UI simulation/ })
+    await tv.focus()
+    await expect(tv.getByRole('list', { name: 'Games items' })).toBeVisible()
+    await page.screenshot({ path: 'test-results/console-sim.png' })
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Enter')
+    const dlg = tv.getByRole('dialog', { name: /Launching “Block Garden”/ })
+    await expect(dlg.getByText('Nothing is launched or played.')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dlg).toHaveCount(0)
+  })
+
+  test('files, network, system and settings panels behave and never invent hardware numbers', async ({ page }) => {
+    const tv = page.getByRole('application', { name: /Console UI simulation/ })
+    await tv.focus()
+    await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight') // Files
+    await page.keyboard.press('ArrowDown') // Captures (Documents first)
+    await page.keyboard.press('Enter')
+    await expect(tv.getByText('screenshot-001.png')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(tv.getByText('Documents')).toBeVisible()
+    await page.keyboard.press('ArrowRight') // Network
+    await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter')
+    await expect(tv.getByText('Simulated result: reachable (not a real test)')).toBeVisible()
+    await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight') // System
+    await expect(tv.getByText('not measured: simulation has no hardware')).toBeVisible()
+    await expect(tv.getByText('not available in a simulation')).toBeVisible()
+    await page.keyboard.press('ArrowRight') // Settings
+    await page.keyboard.press('Enter')
+    await expect(tv.getByText('Show clock: Off')).toBeVisible()
+  })
+
+  test('saved Dashboard Studio themes can be applied in the simulation', async ({ page }) => {
+    await nav(page, 'Dashboard Studio').click()
+    await page.getByRole('button', { name: 'New from template' }).click()
+    await page.getByLabel('Name', { exact: true }).fill('Dusk')
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Saved.' })).toBeVisible()
+    await nav(page, 'Settings').click()
+    await page.getByRole('button', { name: 'Open console UI simulation' }).click()
+    const tv = page.getByRole('application', { name: /Console UI simulation/ })
+    await tv.focus()
+    for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight') // Themes
+    await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter')
+    await expect(tv.getByRole('status')).toHaveText('Theme: Dusk')
+  })
+})
+
 test('screenshots of all templates (visual review artefacts)', async ({ page }) => {
   await nav(page, 'Dashboard Studio').click()
   for (const t of ['minimal', 'aurora', 'grid', 'classic']) {

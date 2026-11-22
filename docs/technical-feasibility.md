@@ -31,7 +31,7 @@ All entries are "simulator-tested only" until real hardware is used; none has be
 | Android/Google TV (ADB) module | CONDITIONALLY SUPPORTED | Needs `adb` + TV with authorized network debugging; separate from PS4 features |
 | HDMI-CEC | EXPERIMENTAL | Needs CEC adapter/driver; deferred |
 | Backup of stock PS4 saves/OS | UNSUPPORTED | Sony's own backup only; app shows instructions |
-| Linux on PS4 Slim (Approach C) | EXPERIMENTAL / research | postmarketOS notes Slim unsupported (2024); needs kernel exploit; no commercial game compat |
+| Linux on PS4 Slim (Approach C) | EXPERIMENTAL / research | Community kernel fork README lists Slim CUH-2215B/2216A as working with kernels 5.4.247/5.15.15 (Baikal/Belize southbridges); needs a kernel exploit on a supported firmware; Sony OS and its games are not available while Linux runs; hardware-risky. Docs only in PS4 Studio |
 
 ## Approaches (alt-OS summary; details in P7 docs)
 | | A: Debian launcher + Remote Play | B: Native homebrew dashboard | C: Linux on PS4 |

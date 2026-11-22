@@ -1,7 +1,7 @@
 <script lang="ts">
   import { LayoutDashboard, Plug, Gamepad2, Palette, Package, FolderOpen, Archive, Stethoscope, Settings } from 'lucide-svelte'
   import { app, sections, type SectionId } from '../app.svelte'
-  const icons: Record<SectionId, typeof Settings> = {
+  const icons: Record<Exclude<SectionId, 'lab'>, typeof Settings> = {
     overview: LayoutDashboard, connections: Plug, remote: Gamepad2, studio: Palette,
     homebrew: Package, files: FolderOpen, backups: Archive, diagnostics: Stethoscope, settings: Settings,
   }

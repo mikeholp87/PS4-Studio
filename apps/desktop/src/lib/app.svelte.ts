@@ -12,7 +12,8 @@ export const sections = [
   { id: 'diagnostics', label: 'Diagnostics' },
   { id: 'settings', label: 'Settings' },
 ] as const
-export type SectionId = (typeof sections)[number]['id']
+/** Reachable from Settings but not in the sidebar. */
+export type SectionId = (typeof sections)[number]['id'] | 'lab'
 
 class AppState {
   section = $state<SectionId>('overview')

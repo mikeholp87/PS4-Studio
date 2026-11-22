@@ -12,6 +12,7 @@
   import FileManager from './routes/FileManager.svelte'
   import Homebrew from './routes/Homebrew.svelte'
   import Backups from './routes/Backups.svelte'
+  import ConsoleSim from './routes/ConsoleSim.svelte'
 
   onMount(() => app.init())
 
@@ -39,6 +40,7 @@
       {:else if app.section === 'backups'}<Backups />
       {:else if app.section === 'diagnostics'}<Diagnostics />
       {:else if app.section === 'settings'}<Settings />
+      {:else if app.section === 'lab'}<ConsoleSim />
       {/if}
     </main>
   </div>

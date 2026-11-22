@@ -8,7 +8,7 @@
 - [x] P4 Dashboard Studio
 - [x] P5 Homebrew / files / backups
 - [x] P6 Companion (protocol + simulator verified; console app is an untested skeleton)
-- [ ] P7 Alt-OS research + simulation
+- [x] P7 Alt-OS research + simulation
 - [ ] P8 Release engineering
 
 ## Done log
@@ -74,3 +74,10 @@
 - Tests: Rust 82 pass (core proto 7 incl. cross-language vectors; companion-vs-simulator 6 incl. wrong code/lockout, version mismatch, rogue server (bad server proof, forged MAC, oversized length, silence), replay and forged-MAC rejection; real-ACL IPC flow extended with companion pairing/transfer/mismatch); C host test passes (`make host-test`, -Wall -Wextra -Werror); Playwright 21.
 - Limits: `ps4_main.c` never compiled with OpenOrbis nor run on hardware (networking, secure random code, rendering, controller nav are TODO); companion port 9777 is our arbitrary choice; link is authenticated but not encrypted and the 8-digit code is brute-forceable offline by a passive LAN observer (PAKE not implemented); pairing is per-connection (nothing persisted); companion status/themes are not shown anywhere except the send dialog.
 - Next: P7 alt-OS docs + console UI simulation, then P8 release engineering.
+
+### P7 Alt-OS research + simulation — done 2026-11-22
+- Implemented: docs/alternative-os-research.md (A/B/C feasibility matrix), hardware-compatibility.md, boot-and-recovery-risks.md (explicitly not a procedure), alternative-os-roadmap.md; Console UI simulation (Settings → Experimental): controller/keyboard navigation (Gamepad API), game launch overlay (simulated), media "now playing", file browser over an in-memory tree, network settings with simulated test, theme management (applies saved Dashboard Studio themes), system info panel (invented/"not measured" — no hardware numbers), settings toggles; permanent SIMULATION badge.
+- Research correction (evidence-based): feeRnt/ps4-linux-12xx README lists Slim models (CUH-2215B, CUH-2216A) with kernels 5.4.247 / 5.15.15 (Aeolia/Belize/Baikal southbridges confirmed); earlier "Slim unsupported" claim derived from a postmarketOS packaging note was too strong and is fixed in research.md and technical-feasibility.md. (The P1 log entry above still shows the old wording; this note supersedes it.)
+- Tests: Playwright 24 (3 new for the simulation); svelte-check/eslint clean.
+- Limits: no hardware-specific facts beyond the cited README/MR; GPU/audio/power status for Slim remains [U]; simulation uses demo data only and is not a standalone kiosk app yet (roadmap stage 2).
+- Next: P8 release engineering (README/LICENSE/etc., packaging .deb, CI hardening, license audit, first-run flow, perf measurements, screenshots).
