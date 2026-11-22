@@ -2,6 +2,9 @@
 //! console name carries a `[SIMULATED]` prefix. No hardware readings are ever fabricated;
 //! storage/memory figures are simply absent (`None`).
 
+pub mod ftp;
+pub use ftp::{serve_ftp, SimFs};
+
 use ps4studio_core::capability::{
     CompanionFact, DiscoveryFact, Facts, FtpFact, HostState, COMPANION_PROTOCOL,
 };

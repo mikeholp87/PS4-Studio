@@ -1,6 +1,6 @@
 [package]
 name = "ps4studio-console-adapters"
-description = "Transport adapters: stock probe, GoldHEN FTP, PS4 Studio companion"
+description = "Transport adapters: remote path policy, hardened FTP client for user-enabled homebrew file services"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,5 +8,10 @@ rust-version.workspace = true
 
 [dependencies]
 serde.workspace = true
-serde_json.workspace = true
 thiserror.workspace = true
+tokio.workspace = true
+ps4studio-core = { path = "../core" }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt", "rt-multi-thread"] }
+ps4studio-mock-console = { path = "../../simulator/mock-console" }
