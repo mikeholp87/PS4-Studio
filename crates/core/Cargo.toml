@@ -1,0 +1,12 @@
+[package]
+name = "ps4studio-core"
+description = "Capability model, safe-operation state machine, persistence and audit log"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

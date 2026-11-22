@@ -1,0 +1,12 @@
+[package]
+name = "ps4studio-console-adapters"
+description = "Transport adapters: stock probe, GoldHEN FTP, PS4 Studio companion"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

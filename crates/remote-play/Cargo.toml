@@ -1,0 +1,12 @@
+[package]
+name = "ps4studio-remote-play"
+description = "Detects and launches an installed chiaki-ng as a separate process"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true

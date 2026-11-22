@@ -1,0 +1,12 @@
+{
+  "name": "ps4-studio",
+  "private": true,
+  "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "dev": "pnpm --filter desktop dev",
+    "check": "pnpm -r --if-present check",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test"
+  }
+}
