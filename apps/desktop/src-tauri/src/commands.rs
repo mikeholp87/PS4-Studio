@@ -219,6 +219,9 @@ pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
                 && value[1..].chars().all(|c| c.is_ascii_hexdigit())
         }
         "first_run_done" => matches!(value, "0" | "1"),
+        "console_notes" => {
+            value.chars().count() <= 1000 && value.chars().all(|c| !c.is_control() || c == '\n')
+        }
         "ftp_port" | "companion_port" => value.parse::<u16>().is_ok_and(|p| p > 0),
         "trusted_publishers" => {
             value.len() <= 400
@@ -607,5 +610,8 @@ mod tests {
         assert!(!setting_ok("accent", "red"));
         assert!(!setting_ok("accent", "#12345g"));
         assert!(!setting_ok("db_path", "/etc/passwd"));
+        assert!(setting_ok("console_notes", "Firmware 9.00\nFan is loud"));
+        assert!(!setting_ok("console_notes", "bell\u{7}"));
+        assert!(!setting_ok("console_notes", &"x".repeat(1001)));
     }
 }

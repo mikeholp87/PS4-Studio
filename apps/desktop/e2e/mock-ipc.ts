@@ -3,11 +3,11 @@ import fixtures from './fixtures/scenarios.json' with { type: 'json' }
 import importable from '../../../packages/theme-engine/fixtures/valid/minimal.json' with { type: 'json' }
 
 /** Installs a fake `window.__TAURI_INTERNALS__` implementing the app's commands in memory. */
-export async function mockTauri(page: Page, opts: { chiaki?: boolean } = {}) {
+export async function mockTauri(page: Page, opts: { chiaki?: boolean; firstRun?: boolean } = {}) {
   await page.addInitScript(
-    ({ fx, chiaki, imp }) => {
+    ({ fx, chiaki, imp, firstRun }) => {
       const themes: Record<string, string> = {}
-      const settings: Record<string, string> = {}
+      const settings: Record<string, string> = firstRun ? {} : { first_run_done: '1' }
       const profiles: any[] = []
       const audit: any[] = []
       let conn: any = null
@@ -119,6 +119,6 @@ export async function mockTauri(page: Page, opts: { chiaki?: boolean } = {}) {
         transformCallback: () => 0,
       }
     },
-    { fx: fixtures as any, chiaki: opts.chiaki ?? false, imp: importable as any },
+    { fx: fixtures as any, chiaki: opts.chiaki ?? false, imp: importable as any, firstRun: opts.firstRun ?? false },
   )
 }

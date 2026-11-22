@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import { app } from '../lib/app.svelte'
+  import { api } from '../lib/api'
   import Card from '../lib/components/Card.svelte'
   import Gated from '../lib/components/Gated.svelte'
   import CapabilityList from '../lib/components/CapabilityList.svelte'
@@ -11,6 +13,10 @@
   const online = $derived(conn?.capabilities.find((c) => c.capability === 'console.basic_status')?.status === 'available')
   const hb = $derived(conn?.capabilities.find((c) => c.capability === 'homebrew.ftp_read')?.status)
   const unavailable = ['CPU temperature', 'Fan status', 'Storage capacity', 'Memory use']
+  let notes = $state('')
+  let saved = $state('')
+  onMount(async () => { notes = saved = (await app.run(() => api.getSetting('console_notes'))) ?? '' })
+  async function saveNotes() { if ((await app.run(() => api.setSetting('console_notes', notes))) !== undefined) saved = notes }
 </script>
 
 {#if !conn}
@@ -57,6 +63,14 @@
       <p class="note">A stock PS4 exposes none of these over the network. They only appear when a verified companion reports them.</p>
     </Card>
 
+    <Card title="Your notes">
+      <label>Anything you want to remember about this console (stored on this computer only)
+        <textarea bind:value={notes} maxlength="1000" rows="4" placeholder="e.g. firmware shown in Settings → System → System Information"></textarea>
+      </label>
+      <button onclick={saveNotes} disabled={notes === saved}>Save notes</button>
+      <p class="note">Because a stock PS4 shares no measurements over the network, this is where you can record values yourself.</p>
+    </Card>
+
     <Card title="Capabilities">
       <CapabilityList entries={conn.capabilities} />
     </Card>
@@ -71,5 +85,7 @@
   dt { color: var(--text-muted); } dd { margin: 0; } small { color: var(--text-muted); }
   .note { color: var(--text-muted); font-size: 12px; margin-top: var(--space-3); }
   .na { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-  .na li { display: flex; justify-content: space-between; } em { color: var(--text-muted); font-style: normal; }
+  .na li { display: flex; justify-content: space-between; }
+  textarea { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; resize: vertical; font: inherit; color: inherit; }
+  label { margin-bottom: var(--space-3); } em { color: var(--text-muted); font-style: normal; }
 </style>

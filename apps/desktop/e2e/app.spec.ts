@@ -8,6 +8,28 @@ test.beforeEach(async ({ page }) => {
 
 const nav = (page: import('@playwright/test').Page, name: string) => page.getByRole('navigation').getByRole('button', { name })
 
+test('first run: welcome explains offline use and independence, then is not shown again', async ({ page }) => {
+  await mockTauri(page, { firstRun: true })
+  await page.goto('/')
+  const dlg = page.getByRole('dialog', { name: 'Welcome to PS4 Studio' })
+  await expect(dlg.getByText('not endorsed by Sony')).toBeVisible()
+  await expect(dlg.getByText('without a console')).toBeVisible()
+  await dlg.getByRole('button', { name: 'Choose a console' }).click()
+  await expect(page.getByRole('heading', { name: 'Offline simulator' })).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await nav(page, 'Overview').click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('notes can be recorded manually for a console', async ({ page }) => {
+  await simulate(page, 'stock')
+  await nav(page, 'Overview').click()
+  await expect(page.getByText('CPU temperature')).toBeVisible()
+  await page.getByLabel(/Anything you want to remember/).fill('Firmware 9.00')
+  await page.getByRole('button', { name: 'Save notes' }).click()
+  await expect(page.getByRole('button', { name: 'Save notes' })).toBeDisabled()
+})
+
 test('first run works offline with no console', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'No console selected' })).toBeVisible()
   await expect(page.getByRole('status')).toHaveText(/Not connected/)
