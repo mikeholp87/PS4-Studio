@@ -41,6 +41,9 @@ const COMMANDS: &[&str] = &[
     "hb_pick_and_scan",
     "hb_verify",
     "hb_upload_op",
+    "companion_connect",
+    "companion_send_theme",
+    "companion_disconnect",
 ];
 
 fn main() {

@@ -49,6 +49,9 @@
     "allow-hb-verify",
     "allow-hb-upload-op",
     "core:event:allow-listen",
-    "core:event:allow-unlisten"
+    "core:event:allow-unlisten",
+    "allow-companion-connect",
+    "allow-companion-send-theme",
+    "allow-companion-disconnect"
   ]
 }

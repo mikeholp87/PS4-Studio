@@ -7,7 +7,7 @@
 - [x] P3 Connection system
 - [x] P4 Dashboard Studio
 - [x] P5 Homebrew / files / backups
-- [ ] P6 Companion
+- [x] P6 Companion (protocol + simulator verified; console app is an untested skeleton)
 - [ ] P7 Alt-OS research + simulation
 - [ ] P8 Release engineering
 
@@ -68,3 +68,9 @@
 - Bugs found+fixed on the way: capability looked verified before any probe in simulator sessions (now unprobed until the user connects); circular Overview gate on "Browse Files".
 - Limits: never run against a real GoldHEN console; credentials session-only (no Secret Service yet); symlink caveat (see security.md); remote files not auto-restorable by design; no pause (service can't); transfer queue is a UI list of sequential operations; `dialog` plugin flows (export/import/pick-folder/save-as) compiled but not exercised in automated tests; installed-homebrew listing, package install trigger and plugin management remain UNSUPPORTED/EXPERIMENTAL per technical-feasibility.md.
 - Next: P6 companion (C source + Rust protocol + mock) then P7 alt-OS docs, P8 release engineering.
+
+### P6 Companion — done 2026-11-22 (desktop side verified; console side NOT verified)
+- Implemented: `core::companion_proto` (versioned v1 framing, mutual HMAC-SHA256 pairing proofs, per-frame MACs with direction labels + sequence numbers, 400 KB frame cap checked before allocation, 7-command allowlist, 2 config keys); `console-adapters::companion::Client`; `mock-console::serve_companion` (one-time code, 3-attempt lockout, replay/forgery rejection, theme validation, honest diagnostics: no hardware numbers); Tauri `companion_connect/send_theme/disconnect`; Studio "Send to console…" dialog with explicit "authenticated, not encrypted" and "does not change the PS4 home screen" notices; portable C protocol core `apps/ps4-companion/src/proto.c` (SHA-256, HMAC, proofs, MACs, allowlists) with host tests; untested OpenOrbis skeleton `src/ps4_main.c` + Makefile + README. Simulator/companion capabilities now start unverified until the user pairs (same fix as FTP).
+- Tests: Rust 82 pass (core proto 7 incl. cross-language vectors; companion-vs-simulator 6 incl. wrong code/lockout, version mismatch, rogue server (bad server proof, forged MAC, oversized length, silence), replay and forged-MAC rejection; real-ACL IPC flow extended with companion pairing/transfer/mismatch); C host test passes (`make host-test`, -Wall -Wextra -Werror); Playwright 21.
+- Limits: `ps4_main.c` never compiled with OpenOrbis nor run on hardware (networking, secure random code, rendering, controller nav are TODO); companion port 9777 is our arbitrary choice; link is authenticated but not encrypted and the 8-digit code is brute-forceable offline by a passive LAN observer (PAKE not implemented); pairing is per-connection (nothing persisted); companion status/themes are not shown anywhere except the send dialog.
+- Next: P7 alt-OS docs + console UI simulation, then P8 release engineering.

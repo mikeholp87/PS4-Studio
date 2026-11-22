@@ -30,6 +30,7 @@ pub struct FileState {
     cancel: Arc<AtomicBool>,
     counter: AtomicU64,
     pub(crate) hb_dir: Mutex<Option<PathBuf>>,
+    pub(crate) companion: tokio::sync::Mutex<Option<ps4studio_console_adapters::companion::Client>>,
 }
 
 impl FileState {
@@ -50,6 +51,9 @@ impl FileState {
             p.clear();
         }
         if let Ok(mut c) = self.client.try_lock() {
+            *c = None;
+        }
+        if let Ok(mut c) = self.companion.try_lock() {
             *c = None;
         }
     }
@@ -486,4 +490,148 @@ pub async fn files_download<R: tauri::Runtime>(
             Err(e.to_string())
         }
     }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Companion (authenticated, NOT encrypted). Kept here because it shares the per-console
+// connection lifecycle (reset on disconnect / console switch).
+// ---------------------------------------------------------------------------------------------
+
+use ps4studio_console_adapters::companion::{Client as CompanionClient, CompanionError};
+use ps4studio_core::capability::CompanionFact;
+
+#[tauri::command]
+pub async fn companion_connect(
+    state: State<'_, AppState>,
+    code: String,
+) -> Result<ConnectionView, String> {
+    *state.files.companion.lock().await = None;
+    let (simulated, scenario, address) = {
+        let g = lock(&state.session)?;
+        let s = g.as_ref().ok_or("Select a console first.")?;
+        (s.facts.simulated, s.scenario_id, s.address)
+    };
+    let addr: SocketAddr = if simulated {
+        let id = scenario.ok_or("No simulator scenario.")?;
+        let has = matches!(
+            ps4studio_mock_console::scenario(id).map(|s| s.facts.companion),
+            Some(CompanionFact::Connected { .. })
+        );
+        if has {
+            let (a, h, _) =
+                ps4studio_mock_console::serve_companion(id, "127.0.0.1:0".parse().map_err(err)?)
+                    .await
+                    .map_err(err)?;
+            lock(&state.files.sim_servers)?.push(h);
+            a
+        } else {
+            let l = tokio::net::TcpListener::bind("127.0.0.1:0")
+                .await
+                .map_err(err)?;
+            let a = l.local_addr().map_err(err)?;
+            drop(l);
+            a
+        }
+    } else {
+        let port: u16 = lock(&state.db)?
+            .get_setting("companion_port")
+            .map_err(err)?
+            .and_then(|p| p.parse().ok())
+            .unwrap_or(9777);
+        SocketAddr::new(address.ok_or("Console has no address.")?, port)
+    };
+    let res = CompanionClient::connect(addr, code.trim(), TIMEOUT).await;
+    let (fact, outcome, reply): (CompanionFact, &str, Result<(), String>) = match res {
+        Ok(c) => {
+            let f = CompanionFact::Connected {
+                protocol: c.info.protocol,
+                version: c.info.version.clone(),
+                theme_management: c.info.theme_management,
+            };
+            *state.files.companion.lock().await = Some(c);
+            (f, "connected", Ok(()))
+        }
+        Err(CompanionError::VersionMismatch { theirs, version }) => (
+            CompanionFact::Connected {
+                protocol: theirs,
+                version,
+                theme_management: false,
+            },
+            "version_mismatch",
+            Ok(()),
+        ),
+        Err(
+            e @ (CompanionError::PairingRejected { .. }
+            | CompanionError::BadCode
+            | CompanionError::ServerAuth
+            | CompanionError::BadMac),
+        ) => (
+            CompanionFact::NotProbed,
+            "pairing_failed",
+            Err(e.to_string()),
+        ),
+        Err(e) => (
+            CompanionFact::Absent,
+            "unreachable",
+            Err(format!(
+                "No companion answered: {e}. Is the PS4 Studio companion running on the console?"
+            )),
+        ),
+    };
+    let mut g = lock(&state.session)?;
+    let s = g.as_mut().ok_or("Console was disconnected.")?;
+    s.facts.companion = fact;
+    let v = view(s);
+    drop(g);
+    lock(&state.db)?
+        .audit(
+            "companion_connect",
+            if simulated { "simulator" } else { "console" },
+            "authenticated, not encrypted",
+            outcome,
+        )
+        .map_err(err)?;
+    reply.map(|()| v)
+}
+
+#[tauri::command]
+pub async fn companion_send_theme(state: State<'_, AppState>, id: String) -> Result<(), String> {
+    let theme = ps4studio_core::themes::ThemeStore::new(
+        paths::data_dir().ok_or("no data directory")?.join("themes"),
+    )
+    .get(&id)
+    .map_err(err)?
+    .ok_or("Save the theme first, then send it.")?;
+    let mut g = state.files.companion.lock().await;
+    let c = g.as_mut().ok_or("Connect to the companion first.")?;
+    let r = c.put_theme(&theme.id, &theme.json).await;
+    if r.is_err() {
+        *g = None; // session state is unknown after an error
+    }
+    drop(g);
+    let db = lock(&state.db)?;
+    match r {
+        Ok(()) => db
+            .audit(
+                "companion_send_theme",
+                &theme.id,
+                "theme stored by the companion",
+                "ok",
+            )
+            .map_err(err),
+        Err(e) => {
+            db.audit("companion_send_theme", &theme.id, &e.to_string(), "failed")
+                .map_err(err)?;
+            Err(e.to_string())
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn companion_disconnect(state: State<'_, AppState>) -> Result<ConnectionView, String> {
+    *state.files.companion.lock().await = None;
+    let mut g = lock(&state.session)?;
+    let s = g.as_mut().ok_or("Select a console first.")?;
+    s.facts.companion = CompanionFact::NotProbed;
+    Ok(view(s))
 }

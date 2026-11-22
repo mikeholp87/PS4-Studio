@@ -13,3 +13,6 @@
 | 9 | 2026-11-22 | Sessions start with FTP "not probed"; simulator FTP fact only scripts the fake server | capabilities must come from a probe, even in the simulator |
 | 10 | 2026-11-22 | One JSON Schema (`theme.schema.json`) shared by TS (ajv) and Rust (jsonschema) + shared fixture corpus | prevents validator drift |
 | 11 | 2026-11-22 | Backups = directory + checksummed manifest, restore only settings/profiles/themes | console files are re-uploaded through the confirmed flow, never silently |
+| 12 | 2026-11-22 | Companion protocol: HMAC-SHA256 over an 8-digit code, no encryption, pair per connection | OpenOrbis runtime has no TLS we can rely on; no persisted secret needed; limits documented in companion README and docs/security.md |
+| 13 | 2026-11-22 | Ship the PS4 companion as protocol core (host-tested) + untested skeleton | toolchain/hardware absent; refuse to claim a working console app |
+

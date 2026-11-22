@@ -1,5 +1,91 @@
 [
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -275,6 +361,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -550,6 +722,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": "chiaki-ng found at simulated:chiaki-ng (simulated). Registration is checked by chiaki-ng itself, not by PS4 Studio.",
+        "reason": null,
+        "status": "available",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -825,6 +1083,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": "chiaki-ng found at simulated:chiaki-ng (simulated). Registration is checked by chiaki-ng itself, not by PS4 Studio.",
+        "reason": null,
+        "status": "available",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -1100,6 +1444,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -1376,6 +1806,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -1651,6 +2167,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -1927,6 +2529,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -2204,6 +2892,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -2479,6 +3253,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -2545,23 +3405,23 @@
       },
       {
         "capability": "companion.connected",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
         "tier": "companion"
       },
       {
         "capability": "companion.dashboard",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
         "tier": "companion"
       },
       {
         "capability": "companion.theme_management",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
         "tier": "companion"
       }
     ],
@@ -2631,23 +3491,23 @@
       },
       {
         "capability": "companion.connected",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
         "tier": "companion"
       },
       {
         "capability": "companion.dashboard",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
         "tier": "companion"
       },
       {
         "capability": "companion.theme_management",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
         "tier": "companion"
       }
     ],
@@ -2717,23 +3577,23 @@
       },
       {
         "capability": "companion.connected",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
         "tier": "companion"
       },
       {
         "capability": "companion.dashboard",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
         "tier": "companion"
       },
       {
         "capability": "companion.theme_management",
-        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
-        "reason": null,
-        "status": "available",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
         "tier": "companion"
       }
     ],
@@ -2755,7 +3615,7 @@
     "simulated": true
   },
   {
-    "after_ftp_probe": [
+    "after_companion": [
       {
         "capability": "console.discovery",
         "evidence": "Console answered the discovery search as Ready (simulated)",
@@ -2837,6 +3697,92 @@
         "capability": "companion.theme_management",
         "evidence": null,
         "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "after_ftp_probe": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
         "status": "unavailable",
         "tier": "companion"
       }
@@ -2908,21 +3854,21 @@
       {
         "capability": "companion.connected",
         "evidence": null,
-        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
-        "status": "unavailable",
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
         "tier": "companion"
       },
       {
         "capability": "companion.dashboard",
         "evidence": null,
-        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "reason": "The companion has not been checked yet.",
         "status": "unavailable",
         "tier": "companion"
       },
       {
         "capability": "companion.theme_management",
         "evidence": null,
-        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "reason": "The companion has not been checked yet.",
         "status": "unavailable",
         "tier": "companion"
       }
@@ -2994,21 +3940,21 @@
       {
         "capability": "companion.connected",
         "evidence": null,
-        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
-        "status": "unavailable",
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
         "tier": "companion"
       },
       {
         "capability": "companion.dashboard",
         "evidence": null,
-        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "reason": "The companion has not been checked yet.",
         "status": "unavailable",
         "tier": "companion"
       },
       {
         "capability": "companion.theme_management",
         "evidence": null,
-        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "reason": "The companion has not been checked yet.",
         "status": "unavailable",
         "tier": "companion"
       }
@@ -3030,6 +3976,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -3307,6 +4339,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",
@@ -3583,6 +4701,92 @@
     "simulated": true
   },
   {
+    "after_companion": [
+      {
+        "capability": "console.discovery",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
     "after_ftp_probe": [
       {
         "capability": "console.discovery",

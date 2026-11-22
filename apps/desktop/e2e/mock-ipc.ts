@@ -54,6 +54,14 @@ export async function mockTauri(page: Page, opts: { chiaki?: boolean } = {}) {
           delete plans[a.planId]
           return { outcome: { lines: ['Uploaded 12 bytes', 'Verified: the console shows the expected result.'], backup: null, verified: true, recovery: 'To undo, delete it on the console.' }, backup_id: null }
         },
+        companion_connect: (a) => {
+          const f = cur()
+          if (a.code !== '24681357') throw 'the pairing code was rejected (2 attempts left)'
+          conn.capabilities = f.after_companion
+          return conn
+        },
+        companion_send_theme: (a) => { if (!themes[a.id]) throw 'Save the theme first, then send it.'; return null },
+        companion_disconnect: () => conn,
         files_cancel: () => null,
         files_download: (a) => `/home/u/${a.remote.split('/').pop()}`,
         backup_create: (a) => {

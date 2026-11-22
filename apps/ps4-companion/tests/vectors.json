@@ -1,0 +1,10 @@
+{
+  "code": "24681357",
+  "cn": "00112233445566778899aabbccddeeff",
+  "sn": "ffeeddccbbaa99887766554433221100",
+  "client_proof": "d748a49f7e847a7b660590adffc4d37c867bf2a051eebf59ed860eb0f85e7dd4",
+  "server_proof": "acbfc00f20aef725810b4552b3dbe54ca8d4ea2b291023dfda16db9679a6ba5c",
+  "session_key": "194ae16320cf7119bb677d44bdcc7d13dad867acb1d0baf487f7d87a94e23fe9",
+  "body": "{\"seq\":1,\"cmd\":\"status\",\"args\":{}}",
+  "c2s_mac": "0e81f4f4f4658f73aa2005d268891006a4c67012f399f47fa4e755bb408d43d4"
+}

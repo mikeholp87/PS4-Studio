@@ -5,12 +5,15 @@
   import { fromTemplate, newTheme, parseThemeText, validateTheme, TEMPLATE_IDS, type TemplateId, type Theme } from '@ps4studio/theme-engine'
   import DashboardPreview from '../lib/components/DashboardPreview.svelte'
   import ThemeEditor from '../lib/components/ThemeEditor.svelte'
+  import CompanionDialog from '../lib/components/CompanionDialog.svelte'
+  import Gated from '../lib/components/Gated.svelte'
 
   let saved = $state<Theme[]>([])
   let draft = $state<Theme>(fromTemplate('aurora'))
   let isSaved = $state(false)
   let info = $state('')
   let newTpl = $state<TemplateId>('aurora')
+  let sending = $state(false)
 
   const snapshot = $derived($state.snapshot(draft) as Theme)
   const result = $derived(validateTheme(snapshot))
@@ -86,6 +89,7 @@
       <button onclick={duplicate}>Duplicate</button>
       <button onclick={exportIt} disabled={!isSaved || dirty} title={!isSaved || dirty ? 'Save the theme first.' : undefined}>Export…</button>
       <button class="danger" onclick={remove} disabled={!isSaved}>Delete</button>
+      <Gated reason={!app.connection ? 'Select a console first.' : !isSaved || dirty ? 'Save the theme first.' : null} onclick={() => (sending = true)}>Send to console…</Gated>
     </div>
     {#if errors.length}<div class="err" role="alert">Cannot save: {errors.join('; ')}</div>{/if}
     {#if info}<p class="hint" role="status">{info}</p>{/if}
@@ -94,6 +98,8 @@
 
   <section class="right"><ThemeEditor bind:theme={draft} /></section>
 </div>
+
+{#if sending}<CompanionDialog themeId={draft.id} onclose={() => (sending = false)} />{/if}
 
 <style>
   .studio { display: grid; grid-template-columns: 190px minmax(0, 1fr) 330px; gap: var(--space-4); align-items: start; }

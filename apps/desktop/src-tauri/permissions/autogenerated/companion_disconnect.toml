@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-companion-disconnect"
+description = "Enables the companion_disconnect command without any pre-configured scope."
+commands.allow = ["companion_disconnect"]
+
+[[permission]]
+identifier = "deny-companion-disconnect"
+description = "Denies the companion_disconnect command without any pre-configured scope."
+commands.deny = ["companion_disconnect"]

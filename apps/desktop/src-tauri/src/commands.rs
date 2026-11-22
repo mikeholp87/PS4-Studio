@@ -1,7 +1,7 @@
 //! Thin Tauri command layer. Logic lives in `ps4studio-core`; this file only validates input,
 //! holds session state, and shapes JSON for the UI.
 
-use ps4studio_core::capability::{evaluate, CapabilityEntry, Facts, FtpFact};
+use ps4studio_core::capability::{evaluate, CapabilityEntry, CompanionFact, Facts, FtpFact};
 use ps4studio_core::db::{AuditEntry, Db};
 use ps4studio_core::model::{
     validate_profile_input, ConsoleModel, ConsoleProfile, Firmware, FirmwareSource,
@@ -112,9 +112,10 @@ pub fn connect_simulator(
             simulated: true,
             last_connected: None,
         },
-        // The scenario's FTP fact only scripts the simulated server; capabilities start unverified.
+        // The scenario's FTP/companion facts only script the simulated servers; capabilities start unverified.
         facts: Facts {
             ftp: FtpFact::NotProbed,
+            companion: CompanionFact::NotProbed,
             ..sc.facts.clone()
         },
         scenario_id: Some(sc.id),
@@ -218,7 +219,7 @@ pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
                 && value[1..].chars().all(|c| c.is_ascii_hexdigit())
         }
         "first_run_done" => matches!(value, "0" | "1"),
-        "ftp_port" => value.parse::<u16>().is_ok_and(|p| p > 0),
+        "ftp_port" | "companion_port" => value.parse::<u16>().is_ok_and(|p| p > 0),
         "trusted_publishers" => {
             value.len() <= 400
                 && value

@@ -17,6 +17,8 @@ PS4 Studio runs as an ordinary user, needs no root, has no background daemon, an
 | Logs / reports | Diagnostic export masks IPv4 host octets, MAC/hex ids, credential-like lines, `$HOME` | `diagnostics::sanitize` | unit tests |
 | Audit | Every connect, unlock/lock, remote change, download, backup/restore/delete, theme change is recorded locally (SQLite) | `core::db::audit` | `ipc_tests` |
 
+| Companion link | Mutual HMAC pairing proofs, per-frame MAC + direction label + sequence, 3-attempt lockout, 7-command allowlist, theme validation on both ends | `core::companion_proto`, `adapters::companion`, simulator | `companion_sim`, C `make host-test`, cross-language vectors |
+
 ## Deliberately not implemented
 Remote shell, BinLoader/payload sending, exploit installation, firmware/boot changes, PSN credential handling, DRM/ban evasion, package auto-install or auto-execution, automatic rollback promises on the console.
 

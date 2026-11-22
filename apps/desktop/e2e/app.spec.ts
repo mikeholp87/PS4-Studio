@@ -131,6 +131,26 @@ test.describe('Dashboard Studio (offline, no console)', () => {
   })
 })
 
+test('Studio: send a theme to the companion (pair, then send), with honest warnings', async ({ page }) => {
+  await simulate(page, 'companion')
+  await nav(page, 'Dashboard Studio').click()
+  await expect(page.getByText('Save the theme first.')).toBeVisible()
+  await page.getByRole('button', { name: 'New from template' }).click()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Saved.' })).toBeVisible()
+  await page.getByRole('button', { name: 'Send to console…' }).click()
+  const dlg = page.getByRole('dialog', { name: 'Send theme to the PS4 Studio companion' })
+  await expect(dlg.getByText('not encrypted')).toBeVisible()
+  await expect(dlg.getByText('do not change the official PS4 home screen')).toBeVisible()
+  await dlg.getByLabel('Pairing code shown on your TV').fill('11111111')
+  await dlg.getByRole('button', { name: 'Pair' }).click()
+  await expect(page.getByRole('alert').first()).toContainText('rejected')
+  await dlg.getByLabel('Pairing code shown on your TV').fill('24681357')
+  await dlg.getByRole('button', { name: 'Pair' }).click()
+  await dlg.getByRole('button', { name: 'Send theme' }).click()
+  await expect(dlg.getByText('Theme sent.')).toBeVisible()
+})
+
 test('screenshots of all templates (visual review artefacts)', async ({ page }) => {
   await nav(page, 'Dashboard Studio').click()
   for (const t of ['minimal', 'aurora', 'grid', 'classic']) {

@@ -50,6 +50,9 @@ pub fn run() {
             homebrew::hb_pick_and_scan,
             homebrew::hb_verify,
             homebrew::hb_upload_op,
+            files::companion_connect,
+            files::companion_send_theme,
+            files::companion_disconnect,
         ])
         .run(tauri::generate_context!())
         .expect("error while running PS4 Studio");
@@ -110,6 +113,10 @@ mod ipc_tests {
                 super::backups_cmd::backup_list,
                 super::backups_cmd::backup_verify,
                 super::commands::list_audit,
+                super::commands::save_theme,
+                super::files::companion_connect,
+                super::files::companion_send_theme,
+                super::files::companion_disconnect,
             ])
             .build(tauri::generate_context!())
             .unwrap();
@@ -227,6 +234,55 @@ mod ipc_tests {
                 && acts.iter().filter(|a| **a == "files_apply").count() >= 2,
             "{acts:?}"
         );
+
+        // Companion: wrong code fails, right code pairs, theme transfer works, mismatch is explained.
+        let v = call(&w, "connect_simulator", json!({"scenarioId": "companion"})).unwrap();
+        assert_eq!(
+            cap(&v, "companion.connected")["status"],
+            "unknown",
+            "not connected until paired"
+        );
+        let e = call(&w, "companion_connect", json!({"code": "00000000"})).unwrap_err();
+        assert!(e.as_str().unwrap().contains("rejected"), "{e}");
+        let v = call(
+            &w,
+            "companion_connect",
+            json!({"code": ps4studio_mock_console::SIM_CODE}),
+        )
+        .unwrap();
+        assert_eq!(cap(&v, "companion.theme_management")["status"], "available");
+        let theme = include_str!("../../../../packages/theme-engine/fixtures/valid/minimal.json");
+        assert!(
+            call(&w, "companion_send_theme", json!({"id": "minimal"})).is_err(),
+            "must be saved first"
+        );
+        call(&w, "save_theme", json!({"json": theme})).unwrap();
+        call(&w, "companion_send_theme", json!({"id": "minimal"})).unwrap();
+        call(
+            &w,
+            "connect_simulator",
+            json!({"scenarioId": "companion_mismatch"}),
+        )
+        .unwrap();
+        let v = call(
+            &w,
+            "companion_connect",
+            json!({"code": ps4studio_mock_console::SIM_CODE}),
+        )
+        .unwrap();
+        assert_eq!(cap(&v, "companion.connected")["status"], "unavailable");
+        assert!(cap(&v, "companion.connected")["reason"]
+            .as_str()
+            .unwrap()
+            .contains("protocol"));
+        call(&w, "connect_simulator", json!({"scenarioId": "stock"})).unwrap();
+        let e = call(
+            &w,
+            "companion_connect",
+            json!({"code": ps4studio_mock_console::SIM_CODE}),
+        )
+        .unwrap_err();
+        assert!(e.as_str().unwrap().contains("No companion answered"), "{e}");
 
         // Unauthorized scenario: service refuses writes -> clear failure, write marked refused.
         call(
