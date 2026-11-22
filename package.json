@@ -8,5 +8,8 @@
     "check": "pnpm -r --if-present check",
     "lint": "pnpm -r --if-present lint",
     "test": "pnpm -r --if-present test"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

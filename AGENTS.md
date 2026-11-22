@@ -16,6 +16,16 @@ backups, diagnostics, simulator. Independent project, not endorsed by Sony.
 - `crates/backups`, `crates/diagnostics` · `simulator/mock-console` fake PS4 (always `simulated:true`)
 - `packages/theme-engine` theme schema/validator/templates · `apps/ps4-companion` C source (OpenOrbis, not built in CI)
 
+## Module ownership (who to read before changing what)
+| Area | Owner docs | Must keep passing |
+|---|---|---|
+| `crates/core` capability engine, DB, themes, companion_proto | docs/architecture.md, docs/security.md | `cargo test -p ps4studio-core`; theme corpus shared with `packages/theme-engine` |
+| `crates/discovery`, `remote-play`, `console-adapters`, `backups`, `diagnostics` | docs/connection-protocols.md, docs/security.md | per-crate tests incl. hostile-input and simulator tests |
+| `simulator/mock-console` | docs/development.md | scenario tests; run `scripts/gen-fixtures.sh` after changes |
+| `apps/desktop/src-tauri` | docs/development.md ("Adding a Tauri command") | `ipc_tests` (real ACL) |
+| `apps/desktop/src`, `packages/theme-engine` | docs/development.md | svelte-check, eslint, vitest, Playwright |
+| `apps/ps4-companion` | apps/ps4-companion/README.md | `make host-test`; console part is an untested skeleton |
+
 ## Rules
 - Capabilities are verified by probes, never inferred from an open port. Unknown = unavailable, with a reason string.
 - Safe-op flow for any console write: INSPECT → PLAN → CONFIRM → APPLY → VERIFY → RECOVER; audit-log every APPLY.

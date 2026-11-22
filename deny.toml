@@ -1,0 +1,20 @@
+# cargo-deny config (run in CI). Allowlist matches the audit in docs/dependencies-and-licenses.md.
+[graph]
+targets = [{ triple = "x86_64-unknown-linux-gnu" }]
+
+[licenses]
+version = 2
+confidence-threshold = 0.9
+allow = [
+  "MIT", "MIT-0", "Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "BSD-3-Clause",
+  "ISC", "Unicode-3.0", "Zlib", "MPL-2.0", "CC0-1.0", "Unlicense", "0BSD", "GPL-3.0-or-later",
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

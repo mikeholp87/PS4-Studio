@@ -1,0 +1,15 @@
+# UNTESTED template. Needs: offline cargo/pnpm sources (flatpak-cargo-generator / flatpak-node-generator),
+# and finish-args review. Remote Play launches chiaki-ng; inside a sandbox that needs `flatpak-spawn --host`
+# or a separate install, which this template does not set up.
+app-id: org.ps4studio.app
+runtime: org.gnome.Platform
+runtime-version: '47'
+sdk: org.gnome.Sdk
+command: ps4-studio
+finish-args:
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=xdg-download
+modules: []   # TODO: add rust/node build modules with vendored sources

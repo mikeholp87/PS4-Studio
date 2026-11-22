@@ -9,7 +9,7 @@
 - [x] P5 Homebrew / files / backups
 - [x] P6 Companion (protocol + simulator verified; console app is an untested skeleton)
 - [x] P7 Alt-OS research + simulation
-- [ ] P8 Release engineering
+- [x] P8 Release engineering (release prep complete; publishing/hardware validation pending)
 
 ## Done log
 ### 2026-11-22 — Claude Code context recovered into Codex
@@ -81,3 +81,9 @@
 - Tests: Playwright 24 (3 new for the simulation); svelte-check/eslint clean.
 - Limits: no hardware-specific facts beyond the cited README/MR; GPU/audio/power status for Slim remains [U]; simulation uses demo data only and is not a standalone kiosk app yet (roadmap stage 2).
 - Next: P8 release engineering (README/LICENSE/etc., packaging .deb, CI hardening, license audit, first-run flow, perf measurements, screenshots).
+
+### P8 Release engineering — done 2026-11-22
+- Implemented: first-run welcome; manual console notes; README (+ real UI screenshots from simulator fixtures), LICENSE (GPL-3.0 text), CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, CHANGELOG, docs/{architecture,installation,troubleshooting,development,performance,licenses}.md; license audit from real `cargo metadata`/`pnpm licenses` output + `deny.toml` (validated with cargo-deny: licenses/bans/sources ok); `cargo audit` found RUSTSEC-2026-0459 (libsqlite3-sys 0.35) → fixed by bumping rusqlite 0.37→0.43 (libsqlite3-sys 0.40); 3 remaining audit *warnings* are transitive from Tauri's GTK stack (chrono unmaintained, proc-macro-error unmaintained, glib 0.18 unsoundness in an API we don't call); Debian package built with Tauri (4.65 MiB, Depends: libsqlite3-0, libwebkit2gtk-4.1-0, libgtk-3-0; Maintainer, copyright file, desktop entry, icons); packaged binary extracted, linked-lib check (no missing libs) and launched; perf measured (docs/performance.md); CI: rust/frontend(+Playwright)/companion-C/shell scripts/security(deny+audit+pnpm audit)/deb jobs + tag-triggered release workflow (workflows YAML-validated, NOT executed on GitHub); shell scripts pass shellcheck+shfmt; packaging notes for AppImage/Flatpak (untested templates).
+- Tests at release prep: cargo 83 pass; vitest 31; Playwright 26; C host test; clippy/fmt/eslint/svelte-check clean.
+- NOT done / limits: no real PS4 testing of anything; `apt install` of the .deb not run on a clean machine (needs sudo); GNOME/X11 untested; AppImage/Flatpak not built; Android/Google TV (ADB) and HDMI-CEC optional module not implemented (deferred, documented as CONDITIONAL/EXPERIMENTAL in technical-feasibility.md); Secret Service storage not wired (no persisted secrets exist); GitHub Actions never run; repository URL placeholder `OWNER` in Cargo.toml/debian copyright; Maintainer email in the .deb is a placeholder noreply address; window-visible startup time not measured.
+- Next (priority): 1) run against a real PS4 (discovery, chiaki-ng launch) and, if available, a homebrew console (FTP) and record results in docs; 2) set the real repo URL/maintainer, push, watch CI; 3) `sudo apt install` the .deb on a clean Debian KDE and GNOME VM; 4) build/test the OpenOrbis companion; 5) optional TV (ADB) module.

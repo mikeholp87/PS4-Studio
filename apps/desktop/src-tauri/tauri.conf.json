@@ -10,13 +10,52 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "title": "PS4 Studio", "width": 1280, "height": 800, "minWidth": 960, "minHeight": 600 }],
-    "security": { "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'" }
+    "windows": [
+      {
+        "title": "PS4 Studio",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 600
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+    }
   },
   "bundle": {
     "active": true,
-    "targets": ["deb"],
-    "icon": ["icons/icon.png"],
-    "category": "Utility"
+    "targets": [
+      "deb"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png"
+    ],
+    "category": "Utility",
+    "shortDescription": "Manage a PlayStation 4 and design console-style dashboards",
+    "longDescription": "PS4 Studio is an independent, open-source desktop application (not endorsed by Sony). It discovers a PS4 on your network, launches Remote Play through chiaki-ng, offers capability-gated file and homebrew tools for consoles that already run a homebrew environment, backups with checksums, diagnostics, and an offline Dashboard Studio for designing console-style themes. It never installs exploits or changes firmware.",
+    "license": "GPL-3.0-or-later",
+    "licenseFile": "../../../LICENSE",
+    "copyright": "PS4 Studio contributors",
+    "linux": {
+      "deb": {
+        "section": "utils",
+        "priority": "optional",
+        "recommends": [
+          "flatpak"
+        ],
+        "files": {
+          "/usr/share/doc/ps4-studio/copyright": "../../../packaging/debian/copyright",
+          "/usr/share/doc/ps4-studio/README.md": "../../../README.md"
+        },
+        "depends": [
+          "libsqlite3-0"
+        ]
+      }
+    },
+    "publisher": "PS4 Studio contributors <ps4-studio@users.noreply.github.com>"
   }
 }
