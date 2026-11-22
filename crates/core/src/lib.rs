@@ -1,1 +1,6 @@
-//! Capability model, safe-operation state machine, persistence and audit log
+//! Capability model, persistence and audit log. No network code lives here.
+
+pub mod capability;
+pub mod db;
+pub mod model;
+pub mod paths;

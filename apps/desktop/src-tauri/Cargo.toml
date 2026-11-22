@@ -6,6 +6,10 @@ edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
+[lib]
+name = "ps4_studio_lib"
+crate-type = ["rlib"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -14,3 +18,8 @@ tauri = { version = "2", features = [] }
 serde.workspace = true
 serde_json.workspace = true
 ps4studio-core = { path = "../../../crates/core" }
+ps4studio-mock-console = { path = "../../../simulator/mock-console" }
+
+[package.metadata.deb]
+name = "ps4-studio"
+section = "utils"

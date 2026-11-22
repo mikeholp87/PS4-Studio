@@ -3,7 +3,7 @@
 ## Phases
 - [ ] P0 Bootstrap (in progress)
 - [x] P1 Research docs (4 docs written; open items listed in research.md)
-- [ ] P2 Desktop foundation
+- [x] P2 Desktop foundation
 - [ ] P3 Connection system
 - [ ] P4 Dashboard Studio
 - [ ] P5 Homebrew / files / backups
@@ -38,3 +38,10 @@
 - Key findings: SRCH wire format verified; chiaki-ng CLI secrets (`--registkey/--passcode`) must never be passed (argv leak); GoldHEN firmware range not asserted; Slim Linux unsupported per 2024 postmarketOS note.
 - Limits: Sony Remote Play page, GoldHEN FTP auth/layout, OpenOrbis APIs not yet verified ([U] tags).
 - Next: P2 foundation.
+
+### P2 Desktop foundation — done 2026-11-22
+- Implemented: `core` (typed capability engine w/ evidence+reasons, SQLite settings/profiles/audit, XDG paths, input validation); `mock-console` (14 labelled scenarios -> Facts); Tauri shell with 11 commands, each explicitly permitted (build.rs AppManifest + capabilities/default.json), settings allowlist; Svelte 5 UI: tokens (dark/light/system/accent), sidebar, header status pill + SIMULATED badge, Overview (real capability data, unavailable measurements), Connections (simulator picker, profile add/delete), Settings (theme, accent, activity log), explanatory pages for later sections, Alt+1..9 nav.
+- Files: crates/core/src/*, simulator/mock-console/src/*, apps/desktop/src-tauri/{build.rs,src/*,capabilities/default.json}, apps/desktop/src/**, .github/workflows/ci.yml
+- Tests: `cargo test` core 11 + mock 2 + shell 1 pass; clippy -D warnings clean; fmt clean; svelte-check 0 errors; eslint clean; vitest 3 pass. `cargo tauri dev` launched on KDE/Wayland, window rendered (screenshot checked), IPC settings read OK.
+- Limits: manual profile "Connect" disabled until P3; no Playwright e2e yet (needs mockIPC); manual notes feature (spec s8) not done; GNOME/X11 untested; first-run flow not built; simulator has no network servers yet.
+- Next: P3 connection (UDP discovery client + mock UDP responder test, connection test w/ timeout/retry, chiaki-ng detect+launch, Remote Control page, Diagnostics).

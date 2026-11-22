@@ -1,5 +1,7 @@
 # Current status
 
-Phase: P1 done, starting P2 (desktop foundation).
-Repo builds (`cargo check --workspace`, `pnpm -r check`). Research docs written; unverified items are tagged [U].
-Nothing tested against a real console. Chiaki-ng, adb, patchelf not installed on dev box.
+Phase: P2 done; next P3 (connection system).
+Works: app launches (Tauri on KDE/Wayland), offline simulator with 14 scenarios, capability table with reasons, profiles, theme/accent, activity log.
+Not done: real network discovery, Remote Play launch, Dashboard Studio, file manager, backups, diagnostics, companion, packaging.
+Nothing tested against a real console. chiaki-ng/adb/patchelf not installed on dev box.
+Quality gates: see docs/tasks.md P2 entry.

@@ -1,89 +1,42 @@
-<script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from './assets/vite.svg'
-  import heroImg from './assets/hero.png'
-  import Counter from './lib/Counter.svelte'
+<script lang="ts">
+  import { onMount } from 'svelte'
+  import { app, sections } from './lib/app.svelte'
+  import Sidebar from './lib/components/Sidebar.svelte'
+  import Header from './lib/components/Header.svelte'
+  import Overview from './routes/Overview.svelte'
+  import Connections from './routes/Connections.svelte'
+  import Settings from './routes/Settings.svelte'
+  import Pending from './routes/Pending.svelte'
+
+  onMount(() => app.init())
+
+  function onKey(e: KeyboardEvent) {
+    if (!e.altKey) return
+    const i = Number(e.key) - 1
+    if (i >= 0 && i < sections.length) { app.go(sections[i].id); e.preventDefault() }
+  }
 </script>
 
-<section id="center">
-  <div class="hero">
-    <img src={heroImg} class="base" width="170" height="179" alt="" />
-    <img src={svelteLogo} class="framework" alt="Svelte logo" />
-    <img src={viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/App.svelte</code> and save to test <code>HMR</code></p>
-  </div>
-  <Counter />
-</section>
+<svelte:window onkeydown={onKey} />
 
-<div class="ticks"></div>
-
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#documentation-icon"></use>
-    </svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank" rel="noreferrer">
-          <img class="logo" src={viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://svelte.dev/" target="_blank" rel="noreferrer">
-          <img class="button-icon" src={svelteLogo} alt="" />
-          Learn more
-        </a>
-      </li>
-    </ul>
+<div class="shell">
+  <Sidebar />
+  <div class="main">
+    <Header />
+    {#if app.error}<div class="error" role="alert">{app.error}</div>{/if}
+    <main id="content" tabindex="-1">
+      {#if app.section === 'overview'}<Overview />
+      {:else if app.section === 'connections'}<Connections />
+      {:else if app.section === 'settings'}<Settings />
+      {:else}<Pending id={app.section} />
+      {/if}
+    </main>
   </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#social-icon"></use>
-    </svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li>
-        <a href="https://github.com/vitejs/vite" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#github-icon"></use>
-          </svg>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://chat.vite.dev/" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#discord-icon"></use>
-          </svg>
-          Discord
-        </a>
-      </li>
-      <li>
-        <a href="https://x.com/vite_js" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#x-icon"></use>
-          </svg>
-          X.com
-        </a>
-      </li>
-      <li>
-        <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#bluesky-icon"></use>
-          </svg>
-          Bluesky
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
+</div>
 
-<div class="ticks"></div>
-<section id="spacer"></section>
+<style>
+  .shell { display: grid; grid-template-columns: 76px 1fr; height: 100%; }
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  main { flex: 1; overflow: auto; padding: var(--space-5); }
+  .error { margin: var(--space-3) var(--space-5) 0; padding: 10px 14px; border: 1px solid var(--bad); border-radius: var(--radius-sm); color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, transparent); }
+</style>
