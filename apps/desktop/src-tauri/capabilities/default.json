@@ -17,6 +17,13 @@
     "allow-delete-profile",
     "allow-get-setting",
     "allow-set-setting",
-    "allow-list-audit"
+    "allow-list-audit",
+    "allow-discover-lan",
+    "allow-connect-profile",
+    "allow-remote-play-status",
+    "allow-start-remote-play",
+    "allow-stop-remote-play",
+    "allow-run-diagnostics",
+    "allow-export-diagnostics"
   ]
 }

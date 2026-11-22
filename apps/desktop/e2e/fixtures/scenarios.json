@@ -1,0 +1,1404 @@
+[
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "No reply to discovery.",
+      "id": "offline",
+      "label": "Console offline",
+      "reported_firmware": null,
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Answers discovery; nothing else.",
+      "id": "stock",
+      "label": "Stock console discovered",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": "chiaki-ng found at simulated:chiaki-ng (simulated). Registration is checked by chiaki-ng itself, not by PS4 Studio.",
+        "reason": null,
+        "status": "available",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Stock console with chiaki-ng installed.",
+      "id": "remote_play",
+      "label": "Remote Play available",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": "chiaki-ng found at simulated:chiaki-ng (simulated). Registration is checked by chiaki-ng itself, not by PS4 Studio.",
+        "reason": null,
+        "status": "available",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "pairing_required"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Remote Play launch fails until registered in chiaki-ng.",
+      "id": "pairing_required",
+      "label": "Pairing required",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": "FTP greeting, login and directory listing succeeded (simulated). Traffic is unencrypted.",
+        "reason": null,
+        "status": "available",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "Writes are locked. Unlock writes for this session to continue.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "FTP service verified by handshake and listing.",
+      "id": "homebrew",
+      "label": "Homebrew service available",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "The file service rejected the login.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Service present but refuses login.",
+      "id": "ftp_auth_failure",
+      "label": "FTP login rejected",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": "FTP greeting, login and directory listing succeeded (simulated). Traffic is unencrypted.",
+        "reason": null,
+        "status": "available",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "Writes are locked. Unlock writes for this session to continue.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Uploads complete and verify.",
+      "id": "transfer_ok",
+      "label": "Transfer succeeds",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": "FTP greeting, login and directory listing succeeded (simulated). Traffic is unencrypted.",
+        "reason": null,
+        "status": "available",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "Writes are locked. Unlock writes for this session to continue.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "after_bytes": 4096,
+        "kind": "transfer_interrupts"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Connection drops mid-upload.",
+      "id": "transfer_interrupted",
+      "label": "Transfer interrupted",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Reports a firmware PS4 Studio has no compatibility data for.",
+      "id": "unsupported_firmware",
+      "label": "Unsupported firmware",
+      "reported_firmware": "0.00",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": "FTP greeting, login and directory listing succeeded (simulated). Traffic is unencrypted.",
+        "reason": null,
+        "status": "available",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "Writes are locked. Unlock writes for this session to continue.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": "Companion 0.1.0-sim speaks protocol 1 (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "PS4 Studio companion with matching protocol.",
+      "id": "companion",
+      "label": "Companion connected",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "Companion 9.9.9-sim uses protocol 2; this app needs 1. Update one of them.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "none"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Companion speaks a different protocol.",
+      "id": "companion_mismatch",
+      "label": "Companion version mismatch",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": "FTP greeting, login and directory listing succeeded (simulated). Traffic is unencrypted.",
+        "reason": null,
+        "status": "available",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "Writes are locked. Unlock writes for this session to continue.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "free_bytes": 1048576,
+        "kind": "storage_limit"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Uploads beyond the free-space limit are refused.",
+      "id": "storage_limit",
+      "label": "Storage nearly full",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": "Console answered the discovery search as Ready (simulated)",
+        "reason": null,
+        "status": "available",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": "FTP greeting, login and directory listing succeeded (simulated). Traffic is unencrypted.",
+        "reason": null,
+        "status": "available",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "Writes are locked. Unlock writes for this session to continue.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "unauthorized_write"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Service accepts login but refuses writes.",
+      "id": "unauthorized",
+      "label": "Unauthorized write",
+      "reported_firmware": "9.xx",
+      "simulated": true
+    },
+    "simulated": true
+  },
+  {
+    "capabilities": [
+      {
+        "capability": "console.discovery",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.basic_status",
+        "evidence": null,
+        "reason": "Console not found. Confirm that the Debian computer and PS4 are on the same local network.",
+        "status": "unknown",
+        "tier": "stock"
+      },
+      {
+        "capability": "console.remote_play",
+        "evidence": null,
+        "reason": "chiaki-ng was not found. Install it (Flathub: io.github.streetpea.Chiaki4deck) and register your console inside it.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "console.remote_wake",
+        "evidence": null,
+        "reason": "Remote wake needs a registration credential that PS4 Studio does not handle in this version.",
+        "status": "unavailable",
+        "tier": "remote_play"
+      },
+      {
+        "capability": "homebrew.ftp_read",
+        "evidence": null,
+        "reason": "File service has not been checked yet.",
+        "status": "unknown",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.ftp_write",
+        "evidence": null,
+        "reason": "File management is unavailable because no supported file service was detected.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.package_install",
+        "evidence": null,
+        "reason": "No verified installation interface is implemented. Package files can be copied to an allowed folder and installed on the console.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.plugin_management",
+        "evidence": null,
+        "reason": "Plugin folder layout has not been verified, so plugins are managed as ordinary files only.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "homebrew.app_launch",
+        "evidence": null,
+        "reason": "No verified API for launching applications exists. Requires the companion with a verified launch interface.",
+        "status": "unavailable",
+        "tier": "homebrew"
+      },
+      {
+        "capability": "companion.connected",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unknown",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.dashboard",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      },
+      {
+        "capability": "companion.theme_management",
+        "evidence": null,
+        "reason": "The companion has not been checked yet.",
+        "status": "unavailable",
+        "tier": "companion"
+      }
+    ],
+    "scenario": {
+      "behavior": {
+        "kind": "timeout"
+      },
+      "console_name": "[SIMULATED] PS4 Slim",
+      "description": "Discovery replies arrive too late.",
+      "id": "timeout",
+      "label": "Network timeout",
+      "reported_firmware": null,
+      "simulated": true
+    },
+    "simulated": true
+  }
+]

@@ -4,7 +4,7 @@ import svelte from 'eslint-plugin-svelte'
 import globals from 'globals'
 
 export default ts.config(
-  { ignores: ['dist', 'node_modules', 'src-tauri'] },
+  { ignores: ['dist', 'node_modules', 'src-tauri', 'playwright-report', 'test-results'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs['flat/recommended'],
@@ -16,4 +16,5 @@ export default ts.config(
     languageOptions: { parserOptions: { parser: ts.parser } },
   },
   { rules: { 'svelte/require-each-key': 'off' } },
+  { files: ['e2e/**'], rules: { '@typescript-eslint/no-explicit-any': 'off' } },
 )

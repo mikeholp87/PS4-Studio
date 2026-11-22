@@ -1,9 +1,11 @@
 <script lang="ts">
   import { app, sections } from '../app.svelte'
   const title = $derived(sections.find((s) => s.id === app.section)?.label ?? '')
+  const answered = $derived(app.connection?.capabilities.find((c) => c.capability === 'console.basic_status')?.status === 'available')
   const status = $derived(
     !app.connection ? { text: 'Not connected', cls: 'off' }
-      : { text: `${app.connection.profile.name}`, cls: 'on' })
+      : answered ? { text: app.connection.profile.name, cls: 'on' }
+      : { text: `${app.connection.profile.name} — no reply`, cls: 'warn' })
 </script>
 
 <header>
@@ -20,5 +22,6 @@
   .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; background: var(--bg); }
   .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
   .pill.on i { background: var(--ok); }
+  .pill.warn i { background: var(--warn); }
   .sim { font-size: 11px; font-weight: 700; letter-spacing: .08em; padding: 3px 8px; border-radius: 4px; background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn); border: 1px solid var(--warn); }
 </style>

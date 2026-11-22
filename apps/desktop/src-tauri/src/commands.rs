@@ -8,15 +8,20 @@ use ps4studio_core::model::{
 };
 use ps4studio_core::paths;
 use serde::{Deserialize, Serialize};
+use std::net::{IpAddr, SocketAddr};
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::State;
 
 pub struct AppState {
     db: Mutex<Db>,
     session: Mutex<Option<Session>>,
+    remote_play: Mutex<Option<ps4studio_remote_play::Session>>,
 }
 
 struct Session {
+    address: Option<IpAddr>,
+    last_probe_error: Option<String>,
     profile: ConsoleProfile,
     facts: Facts,
     scenario_id: Option<&'static str>,
@@ -29,6 +34,7 @@ impl AppState {
         Ok(Self {
             db: Mutex::new(db),
             session: Mutex::new(None),
+            remote_play: Mutex::new(None),
         })
     }
 }
@@ -90,6 +96,8 @@ pub fn connect_simulator(
         },
     };
     let session = Session {
+        address: None,
+        last_probe_error: None,
         profile: ConsoleProfile {
             id: 0,
             name: sc.console_name.clone(),
@@ -200,13 +208,23 @@ fn setting_ok(key: &str, value: &str) -> bool {
                 && value[1..].chars().all(|c| c.is_ascii_hexdigit())
         }
         "first_run_done" => matches!(value, "0" | "1"),
+        "chiaki_nickname" => ps4studio_remote_play::LaunchSpec {
+            nickname: value.to_owned(),
+            host: IpAddr::from([0, 0, 0, 0]),
+            fullscreen: false,
+        }
+        .validate()
+        .is_ok(),
         _ => false,
     }
 }
 
 #[tauri::command]
 pub fn get_setting(state: State<AppState>, key: String) -> Result<Option<String>, String> {
-    if !matches!(key.as_str(), "theme" | "accent" | "first_run_done") {
+    if !matches!(
+        key.as_str(),
+        "theme" | "accent" | "first_run_done" | "chiaki_nickname"
+    ) {
         return Err("Unknown setting.".into());
     }
     lock(&state.db)?
@@ -227,6 +245,246 @@ pub fn set_setting(state: State<AppState>, key: String, value: String) -> Result
 #[tauri::command]
 pub fn list_audit(state: State<AppState>) -> Result<Vec<AuditEntry>, String> {
     lock(&state.db)?.list_audit(200).map_err(|e| e.to_string())
+}
+
+#[derive(Serialize)]
+pub struct Discovered {
+    address: String,
+    name: Option<String>,
+    state: ps4studio_core::capability::HostState,
+    firmware_hint: Option<String>,
+}
+
+/// User-initiated limited-broadcast search (stays on the local segment).
+#[tauri::command]
+pub async fn discover_lan(state: State<'_, AppState>) -> Result<Vec<Discovered>, String> {
+    let found = ps4studio_discovery::discover_lan(Duration::from_secs(2))
+        .await
+        .map_err(|e| format!("Discovery failed: {e}"))?;
+    lock(&state.db)?
+        .audit(
+            "discover_lan",
+            "broadcast:987",
+            &format!("{} console(s) answered", found.len()),
+            "ok",
+        )
+        .map_err(|e| e.to_string())?;
+    Ok(found
+        .into_iter()
+        .map(|f| Discovered {
+            address: f.address.to_string(),
+            name: f.reply.host_name.clone(),
+            state: f.reply.state,
+            firmware_hint: f.reply.firmware_hint(),
+        })
+        .collect())
+}
+
+/// Probes the saved console with unicast discovery (3 tries, 1 s each) and builds verified facts.
+#[tauri::command]
+pub async fn connect_profile(
+    state: State<'_, AppState>,
+    id: i64,
+) -> Result<ConnectionView, String> {
+    let mut profile = lock(&state.db)?
+        .get_profile(id)
+        .map_err(|e| e.to_string())?
+        .ok_or("Console not found.")?;
+    let ip: IpAddr = profile
+        .address
+        .as_deref()
+        .unwrap_or_default()
+        .parse()
+        .map_err(|_| "Saved address is invalid.")?;
+    let result = ps4studio_discovery::probe(
+        SocketAddr::new(ip, ps4studio_discovery::PORT_PS4),
+        Duration::from_secs(1),
+        3,
+    )
+    .await;
+    let mut facts = Facts::empty();
+    facts.remote_play_binary = ps4studio_remote_play::detect().map(|b| b.describe());
+    let mut err = None;
+    match result {
+        Ok(r) => {
+            facts.discovery = Some(r.fact());
+            if profile.firmware.value.is_none() {
+                if let Some(h) = r.firmware_hint() {
+                    profile.firmware = Firmware {
+                        value: Some(h),
+                        source: FirmwareSource::Reported,
+                    };
+                }
+            }
+        }
+        Err(e) => err = Some(e.to_string()),
+    }
+    {
+        let db = lock(&state.db)?;
+        db.audit(
+            "connect_profile",
+            &profile.name,
+            err.as_deref().unwrap_or("console answered discovery"),
+            if err.is_some() { "no_reply" } else { "ok" },
+        )
+        .map_err(|e| e.to_string())?;
+        if err.is_none() {
+            db.touch_connected(profile.id).map_err(|e| e.to_string())?;
+        }
+    }
+    let session = Session {
+        address: Some(ip),
+        last_probe_error: err,
+        profile,
+        facts,
+        scenario_id: None,
+    };
+    let out = view(&session);
+    *lock(&state.session)? = Some(session);
+    Ok(out)
+}
+
+#[derive(Serialize)]
+pub struct RemotePlayStatus {
+    installed: bool,
+    binary: Option<String>,
+    nickname: Option<String>,
+    running: bool,
+}
+
+#[tauri::command]
+pub fn remote_play_status(state: State<AppState>) -> Result<RemotePlayStatus, String> {
+    let bin = ps4studio_remote_play::detect();
+    let running = match lock(&state.remote_play)?.as_mut() {
+        Some(s) => s.try_exit().map_err(|e| e.to_string())?.is_none(),
+        None => false,
+    };
+    Ok(RemotePlayStatus {
+        installed: bin.is_some(),
+        binary: bin.map(|b| b.describe()),
+        nickname: lock(&state.db)?
+            .get_setting("chiaki_nickname")
+            .map_err(|e| e.to_string())?,
+        running,
+    })
+}
+
+#[tauri::command]
+pub fn start_remote_play(
+    state: State<AppState>,
+    nickname: String,
+    fullscreen: bool,
+) -> Result<(), String> {
+    let (ip, simulated, caps) = {
+        let g = lock(&state.session)?;
+        let s = g.as_ref().ok_or("Select a console first.")?;
+        (s.address, s.facts.simulated, evaluate(&s.facts))
+    };
+    if simulated {
+        return Err(
+            "This is a simulated console, so no real Remote Play session is started.".into(),
+        );
+    }
+    if let Some(e) = caps
+        .iter()
+        .find(|c| c.capability == ps4studio_core::capability::Capability::ConsoleRemotePlay)
+    {
+        if e.status != ps4studio_core::capability::Status::Available {
+            return Err(e
+                .reason
+                .clone()
+                .unwrap_or_else(|| "Remote Play is not available.".into()));
+        }
+    }
+    let bin = ps4studio_remote_play::detect().ok_or("chiaki-ng is not installed.")?;
+    let spec = ps4studio_remote_play::LaunchSpec {
+        nickname: nickname.clone(),
+        host: ip.ok_or("Console has no address.")?,
+        fullscreen,
+    };
+    spec.validate().map_err(|e| e.to_string())?;
+    let mut slot = lock(&state.remote_play)?;
+    if let Some(s) = slot.as_mut() {
+        if s.try_exit().map_err(|e| e.to_string())?.is_none() {
+            return Err("A Remote Play session is already running.".into());
+        }
+    }
+    *slot = Some(ps4studio_remote_play::Session::start(&bin, &spec).map_err(|e| e.to_string())?);
+    drop(slot);
+    let db = lock(&state.db)?;
+    db.set_setting("chiaki_nickname", &nickname)
+        .map_err(|e| e.to_string())?;
+    db.audit(
+        "remote_play_start",
+        &nickname,
+        "chiaki-ng launched (no credentials passed)",
+        "ok",
+    )
+    .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn stop_remote_play(state: State<'_, AppState>) -> Result<(), String> {
+    let taken = lock(&state.remote_play)?.take();
+    if let Some(mut s) = taken {
+        s.stop(Duration::from_secs(3))
+            .await
+            .map_err(|e| e.to_string())?;
+        lock(&state.db)?
+            .audit("remote_play_stop", "-", "", "ok")
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[derive(Serialize)]
+pub struct Diagnostics {
+    checks: Vec<ps4studio_diagnostics::Check>,
+}
+
+fn gather(state: &AppState) -> Result<Vec<ps4studio_diagnostics::Check>, String> {
+    use ps4studio_diagnostics::{capability_checks, local_checks, Check, Level};
+    let mut checks = local_checks(paths::data_dir().as_deref());
+    if let Some(s) = lock(&state.session)?.as_ref() {
+        checks.push(Check {
+            id: "console",
+            title: "Selected console".into(),
+            level: if s.facts.discovery.is_some() { Level::Pass } else { Level::Fail },
+            detail: match (&s.last_probe_error, s.facts.simulated) {
+                (_, true) => "Simulated console (not real hardware).".into(),
+                (Some(e), _) => format!("{e} ({})", s.address.map(|a| a.to_string()).unwrap_or_default()),
+                (None, _) => "Console answered the discovery search.".into(),
+            },
+            hint: s.facts.discovery.is_none().then(|| "Console not found. Confirm that the Debian computer and PS4 are on the same local network, and that the PS4 is on or in Rest Mode.".to_string()),
+        });
+        checks.extend(capability_checks(&evaluate(&s.facts)));
+    }
+    Ok(checks)
+}
+
+#[tauri::command]
+pub fn run_diagnostics(state: State<AppState>) -> Result<Diagnostics, String> {
+    Ok(Diagnostics {
+        checks: gather(&state)?,
+    })
+}
+
+/// Writes a sanitised report under the XDG data dir and returns its path.
+#[tauri::command]
+pub fn export_diagnostics(state: State<AppState>) -> Result<String, String> {
+    let checks = gather(&state)?;
+    let home = std::env::var("HOME").ok();
+    let text = ps4studio_diagnostics::render_report(&checks, "", home.as_deref());
+    let dir = paths::data_dir()
+        .ok_or("no data directory")?
+        .join("reports");
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let path = dir.join(format!("diagnostics-{}.txt", ps4studio_core::db::now()));
+    std::fs::write(&path, text).map_err(|e| e.to_string())?;
+    lock(&state.db)?
+        .audit("export_diagnostics", "-", "sanitised report written", "ok")
+        .map_err(|e| e.to_string())?;
+    Ok(path.display().to_string())
 }
 
 #[cfg(test)]

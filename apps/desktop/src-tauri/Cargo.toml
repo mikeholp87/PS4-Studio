@@ -19,6 +19,10 @@ serde.workspace = true
 serde_json.workspace = true
 ps4studio-core = { path = "../../../crates/core" }
 ps4studio-mock-console = { path = "../../../simulator/mock-console" }
+ps4studio-discovery = { path = "../../../crates/discovery" }
+ps4studio-remote-play = { path = "../../../crates/remote-play" }
+ps4studio-diagnostics = { path = "../../../crates/diagnostics" }
+tokio.workspace = true
 
 [package.metadata.deb]
 name = "ps4-studio"

@@ -4,7 +4,7 @@
 - [ ] P0 Bootstrap (in progress)
 - [x] P1 Research docs (4 docs written; open items listed in research.md)
 - [x] P2 Desktop foundation
-- [ ] P3 Connection system
+- [x] P3 Connection system
 - [ ] P4 Dashboard Studio
 - [ ] P5 Homebrew / files / backups
 - [ ] P6 Companion
@@ -45,3 +45,11 @@
 - Tests: `cargo test` core 11 + mock 2 + shell 1 pass; clippy -D warnings clean; fmt clean; svelte-check 0 errors; eslint clean; vitest 3 pass. `cargo tauri dev` launched on KDE/Wayland, window rendered (screenshot checked), IPC settings read OK.
 - Limits: manual profile "Connect" disabled until P3; no Playwright e2e yet (needs mockIPC); manual notes feature (spec s8) not done; GNOME/X11 untested; first-run flow not built; simulator has no network servers yet.
 - Next: P3 connection (UDP discovery client + mock UDP responder test, connection test w/ timeout/retry, chiaki-ng detect+launch, Remote Control page, Diagnostics).
+
+### P3 Connection system — done 2026-11-22
+- Implemented: `discovery` crate (SRCH build, strict size-capped parser with sanitising, unicast probe w/ retries + source-IP check, user-initiated limited-broadcast search); `mock-console::serve_discovery` real UDP responder (offline = silent, timeout = late, labelled [SIMULATED], no invented firmware); `remote-play` crate (detect native/Flatpak chiaki-ng, validated LaunchSpec, argv builder proven free of --registkey/--morning/--passcode, output discarded, SIGTERM→kill stop); `diagnostics` crate (local + capability checks, sanitizer: IPv4 masking, MAC/hex ids, credential lines, $HOME); 7 new Tauri commands (each explicitly permitted); UI: Connect on saved consoles (real probe), LAN search, Remote Control page (setup guide, nickname, gated Start/Stop, polling only while running), Diagnostics page + sanitised export; Playwright e2e (10 tests) with mocked IPC and fixtures generated from the real Rust engine (scripts/gen-fixtures.sh).
+- Files: crates/{discovery,remote-play,diagnostics}/**, simulator/mock-console/src/*, apps/desktop/src-tauri/src/commands.rs, apps/desktop/src/{lib/api.ts,routes/{Connections,RemoteControl,Diagnostics}.svelte}, apps/desktop/e2e/**, scripts/gen-fixtures.sh
+- Tests: cargo test --workspace 34 pass (discovery 10 incl. hostile replies + simulator integration; remote-play 5; diagnostics 5; core 11; mock 2; shell 1); clippy -D warnings clean; fmt clean; svelte-check 0; eslint clean; vitest 3; Playwright 10 pass (needs `PW_CHROMIUM=<chromium path>` or `playwright install`). Real app launched on KDE/Wayland without errors.
+- Bug found+fixed in testing: sanitizer skipped IP masking on text preceding a secret keyword.
+- Limits: chiaki-ng not installed here -> Remote Play launch only tested with a fake binary; real discovery never run against a real PS4; broadcast search not run on this LAN; tauri commands themselves have no Rust integration tests (logic is in crates); e2e uses mocked IPC; remote wake not implemented (UNSUPPORTED); connect failure state shown via header "no reply" + Diagnostics.
+- Next: P4 Dashboard Studio (theme-engine package: schema/validator/templates, editor, 1080p preview, import/export).

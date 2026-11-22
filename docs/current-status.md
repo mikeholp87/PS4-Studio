@@ -1,7 +1,7 @@
 # Current status
 
-Phase: P2 done; next P3 (connection system).
-Works: app launches (Tauri on KDE/Wayland), offline simulator with 14 scenarios, capability table with reasons, profiles, theme/accent, activity log.
-Not done: real network discovery, Remote Play launch, Dashboard Studio, file manager, backups, diagnostics, companion, packaging.
+Phase: P3 done; next P4 (Dashboard Studio).
+Works: app launches; offline simulator (14 scenarios) incl. a real UDP responder; LAN search + saved-console probe (unicast 987); capability table with reasons; chiaki-ng detect/launch/stop (fake-binary tested); diagnostics + sanitised export; theme/accent; activity log; 34 Rust tests, 3 vitest, 10 Playwright.
+Not done: Dashboard Studio, file manager/FTP, homebrew, backups, companion, alt-OS docs, packaging/release docs.
 Nothing tested against a real console. chiaki-ng/adb/patchelf not installed on dev box.
-Quality gates: see docs/tasks.md P2 entry.
+Run e2e: `cd apps/desktop && PW_CHROMIUM=$HOME/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome pnpm e2e`

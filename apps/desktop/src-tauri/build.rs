@@ -11,6 +11,13 @@ const COMMANDS: &[&str] = &[
     "get_setting",
     "set_setting",
     "list_audit",
+    "discover_lan",
+    "connect_profile",
+    "remote_play_status",
+    "start_remote_play",
+    "stop_remote_play",
+    "run_diagnostics",
+    "export_diagnostics",
 ];
 
 fn main() {

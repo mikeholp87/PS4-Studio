@@ -254,6 +254,52 @@ pub fn scenario(id: &str) -> Option<Scenario> {
     scenarios().into_iter().find(|s| s.id == id)
 }
 
+/// Starts a simulated discovery responder on `bind` (use port 0 for tests). The reply is honest:
+/// it is labelled `[SIMULATED]` and carries no fabricated firmware or hardware values.
+pub async fn serve_discovery(
+    scenario_id: &str,
+    bind: std::net::SocketAddr,
+) -> std::io::Result<(std::net::SocketAddr, tokio::task::JoinHandle<()>)> {
+    let sc = scenario(scenario_id).ok_or_else(|| std::io::Error::other("unknown scenario"))?;
+    let sock = tokio::net::UdpSocket::bind(bind).await?;
+    let addr = sock.local_addr()?;
+    let handle = tokio::spawn(async move {
+        let mut buf = [0u8; 512];
+        loop {
+            let Ok((n, from)) = sock.recv_from(&mut buf).await else {
+                return;
+            };
+            if !buf[..n].starts_with(b"SRCH ") {
+                continue;
+            }
+            let delay = match sc.behavior {
+                Behavior::Timeout => std::time::Duration::from_secs(30),
+                _ => std::time::Duration::ZERO,
+            };
+            let Some(d) = sc.facts.discovery.as_ref() else {
+                if delay.is_zero() {
+                    continue; // offline: stay silent
+                }
+                tokio::time::sleep(delay).await;
+                let _ = sock
+                    .send_to(b"HTTP/1.1 200 Ok\nhost-name:[SIMULATED] late\n\n", from)
+                    .await;
+                continue;
+            };
+            let status = match d.state {
+                ps4studio_core::capability::HostState::Ready => "200 Ok",
+                ps4studio_core::capability::HostState::Standby => "620 Server Standby",
+            };
+            let msg = format!(
+                "HTTP/1.1 {status}\nhost-name:{}\nhost-type:PS4\ndevice-discovery-protocol-version:00020020\n\n",
+                sc.console_name
+            );
+            let _ = sock.send_to(msg.as_bytes(), from).await;
+        }
+    });
+    Ok((addr, handle))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

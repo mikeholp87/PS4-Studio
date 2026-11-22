@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { app } from '../lib/app.svelte'
-  import { api, type ConsoleProfile, type ConsoleModel, type Scenario } from '../lib/api'
+  import { api, type ConsoleProfile, type ConsoleModel, type Scenario, type Discovered } from '../lib/api'
   import Card from '../lib/components/Card.svelte'
-  import Gated from '../lib/components/Gated.svelte'
 
   let profiles = $state<ConsoleProfile[]>([])
   let scenarios = $state<Scenario[]>([])
+  let found = $state<Discovered[] | null>(null)
+  let searching = $state(false)
+  let busy = $state<number | null>(null)
   let pick = $state('stock')
   let form = $state({ name: '', model: 'slim' as ConsoleModel, address: '', firmware: '' })
 
@@ -21,6 +23,20 @@
     if (p) { form = { name: '', model: 'slim', address: '', firmware: '' }; await load() }
   }
   async function remove(id: number) { if (await app.run(() => api.deleteProfile(id))) await load() }
+  async function search() {
+    searching = true
+    found = (await app.run(api.discoverLan)) ?? null
+    searching = false
+  }
+  function use(d: Discovered) {
+    form = { ...form, name: d.name ?? 'My PS4', address: d.address, firmware: d.firmware_hint ?? '' }
+  }
+  async function connect(id: number) {
+    busy = id
+    const c = await app.run(() => api.connectProfile(id))
+    busy = null
+    if (c) { app.connection = c; await load(); app.go(c.capabilities.some((x) => x.capability === 'console.basic_status' && x.status === 'available') ? 'overview' : 'diagnostics') }
+  }
   async function sim() { const c = await app.run(() => api.connectSimulator(pick)); if (c) { app.connection = c; app.go('overview') } }
   const desc = $derived(scenarios.find((s) => s.id === pick)?.description ?? '')
 </script>
@@ -33,6 +49,21 @@
     </label>
     <p class="hint">{desc}</p>
     <button class="primary" onclick={sim}>Connect to simulator</button>
+  </Card>
+
+  <Card title="Find consoles on this network">
+    <p class="hint">Sends one discovery broadcast (UDP 987) on your local network and lists consoles that answer. Nothing else is probed. A console in Rest Mode may answer as standby.</p>
+    <button onclick={search} disabled={searching}>{searching ? 'Searching…' : 'Search local network'}</button>
+    {#if found}
+      {#if found.length === 0}
+        <p class="hint">No console answered. Confirm that the Debian computer and PS4 are on the same local network, then try again or add the console by IP address.</p>
+      {:else}
+        <table>
+          <thead><tr><th>Name</th><th>Address</th><th>State</th><th></th></tr></thead>
+          <tbody>{#each found as d}<tr><td>{d.name ?? '—'}</td><td>{d.address}</td><td>{d.state}</td><td class="end"><button onclick={() => use(d)}>Use</button></td></tr>{/each}</tbody>
+        </table>
+      {/if}
+    {/if}
   </Card>
 
   <Card title="Add your console">
@@ -48,7 +79,7 @@
       <label>Firmware (optional, as shown on the PS4)<input bind:value={form.firmware} placeholder="9.00" /></label>
       <button class="primary" type="submit">Save console</button>
     </form>
-    <p class="hint">Saving does not contact the console. Network discovery and connection tests arrive in the next phase.</p>
+    <p class="hint">Saving does not contact the console. Press Connect on a saved console to test it.</p>
   </Card>
 
   <Card title="Saved consoles">
@@ -62,7 +93,7 @@
             <tr>
               <td>{p.name}</td><td>{p.model}</td><td>{p.address}</td><td>{p.firmware.value ?? '—'}</td>
               <td class="end">
-                <Gated reason="Connection tests arrive in phase 3 (network discovery)." onclick={() => {}}>Connect</Gated>
+                <button class="primary" disabled={busy === p.id} onclick={() => connect(p.id)}>{busy === p.id ? 'Testing…' : 'Connect'}</button>
                 <button class="danger" onclick={() => remove(p.id)}>Remove</button>
               </td>
             </tr>

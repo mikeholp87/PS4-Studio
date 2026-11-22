@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-remote-play-status"
+description = "Enables the remote_play_status command without any pre-configured scope."
+commands.allow = ["remote_play_status"]
+
+[[permission]]
+identifier = "deny-remote-play-status"
+description = "Denies the remote_play_status command without any pre-configured scope."
+commands.deny = ["remote_play_status"]

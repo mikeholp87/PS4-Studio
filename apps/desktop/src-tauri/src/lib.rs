@@ -16,6 +16,13 @@ pub fn run() {
             commands::get_setting,
             commands::set_setting,
             commands::list_audit,
+            commands::discover_lan,
+            commands::connect_profile,
+            commands::remote_play_status,
+            commands::start_remote_play,
+            commands::stop_remote_play,
+            commands::run_diagnostics,
+            commands::export_diagnostics,
         ])
         .run(tauri::generate_context!())
         .expect("error while running PS4 Studio");
