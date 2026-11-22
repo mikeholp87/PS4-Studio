@@ -81,7 +81,7 @@
   let clock: ReturnType<typeof setInterval>
   let ro: ResizeObserver
   onMount(() => {
-    ro = new ResizeObserver(() => { scale = box.clientWidth / 1920 })
+    ro = new ResizeObserver(() => requestAnimationFrame(() => { scale = box.clientWidth / 1920 }))
     ro.observe(box)
     clock = setInterval(() => (now = new Date()), 30_000)
     const on = (e: GamepadEvent) => (pad = e.gamepad.id.slice(0, 40))

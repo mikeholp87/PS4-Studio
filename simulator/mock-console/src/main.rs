@@ -1,6 +1,6 @@
 //! `mock-console`: prints the scenario table, or with `--json` the scenarios plus the capability
 //! table the real engine computes for each (used to generate UI test fixtures).
-use ps4studio_core::capability::evaluate;
+use ps4studio_core::capability::{evaluate, Facts, FtpFact};
 
 fn main() {
     let all = ps4studio_mock_console::scenarios();
@@ -8,9 +8,24 @@ fn main() {
         let out: Vec<_> = all
             .iter()
             .map(|s| {
+                // Capabilities as the UI sees them at each stage of the real flow:
+                // `capabilities` = just selected (FTP unprobed); `after_ftp_probe` = scripted FTP result
+                // verified; `after_unlock` = additionally writes unlocked by the user.
+                let base = Facts {
+                    ftp: FtpFact::NotProbed,
+                    ..s.facts.clone()
+                };
+                let probed = s.facts.clone();
+                let unlocked = Facts {
+                    write_unlocked: true,
+                    ..s.facts.clone()
+                };
                 serde_json::json!({
                     "scenario": s,
-                    "capabilities": evaluate(&s.facts),
+                    "ftp_script": s.facts.ftp,
+                    "capabilities": evaluate(&base),
+                    "after_ftp_probe": evaluate(&probed),
+                    "after_unlock": evaluate(&unlocked),
                     "simulated": s.facts.simulated,
                 })
             })

@@ -1,7 +1,7 @@
 //! Thin Tauri command layer. Logic lives in `ps4studio-core`; this file only validates input,
 //! holds session state, and shapes JSON for the UI.
 
-use ps4studio_core::capability::{evaluate, CapabilityEntry, Facts};
+use ps4studio_core::capability::{evaluate, CapabilityEntry, Facts, FtpFact};
 use ps4studio_core::db::{AuditEntry, Db};
 use ps4studio_core::model::{
     validate_profile_input, ConsoleModel, ConsoleProfile, Firmware, FirmwareSource,
@@ -53,6 +53,7 @@ pub struct ConnectionView {
     profile: ConsoleProfile,
     scenario_id: Option<&'static str>,
     simulated: bool,
+    write_unlocked: bool,
     capabilities: Vec<CapabilityEntry>,
 }
 
@@ -61,6 +62,7 @@ pub(crate) fn view(s: &Session) -> ConnectionView {
         profile: s.profile.clone(),
         scenario_id: s.scenario_id,
         simulated: s.facts.simulated,
+        write_unlocked: s.facts.write_unlocked,
         capabilities: evaluate(&s.facts),
     }
 }
@@ -110,7 +112,11 @@ pub fn connect_simulator(
             simulated: true,
             last_connected: None,
         },
-        facts: sc.facts.clone(),
+        // The scenario's FTP fact only scripts the simulated server; capabilities start unverified.
+        facts: Facts {
+            ftp: FtpFact::NotProbed,
+            ..sc.facts.clone()
+        },
         scenario_id: Some(sc.id),
     };
     let out = view(&session);
@@ -214,7 +220,10 @@ pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
         "first_run_done" => matches!(value, "0" | "1"),
         "ftp_port" => value.parse::<u16>().is_ok_and(|p| p > 0),
         "trusted_publishers" => {
-            value.len() <= 400 && value.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, ' ' | '.' | '_' | '-' | ','))
+            value.len() <= 400
+                && value
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || matches!(c, ' ' | '.' | '_' | '-' | ','))
         }
         "chiaki_nickname" => ps4studio_remote_play::LaunchSpec {
             nickname: value.to_owned(),

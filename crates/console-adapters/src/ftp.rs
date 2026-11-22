@@ -74,20 +74,37 @@ fn clean(s: &str) -> String {
 
 async fn read_line_limited<R: AsyncBufReadExt + Unpin>(r: &mut R) -> Result<String, FtpError> {
     let mut buf = Vec::new();
-    let n = (&mut *r).take(MAX_LINE as u64 + 1).read_until(b'\n', &mut buf).await?;
+    let n = (&mut *r)
+        .take(MAX_LINE as u64 + 1)
+        .read_until(b'\n', &mut buf)
+        .await?;
     if n == 0 {
         return Err(FtpError::Protocol("connection closed".into()));
     }
     if buf.last() != Some(&b'\n') {
         return Err(FtpError::Protocol("reply line too long".into()));
     }
-    Ok(String::from_utf8_lossy(&buf).trim_end_matches(['\r', '\n']).to_owned())
+    Ok(String::from_utf8_lossy(&buf)
+        .trim_end_matches(['\r', '\n'])
+        .to_owned())
 }
 
 impl FtpClient {
-    pub async fn connect(addr: SocketAddr, user: &str, pass: &str, dur: Duration) -> Result<Self, FtpError> {
-        let tcp = timeout(dur, TcpStream::connect(addr)).await.map_err(|_| FtpError::Timeout)??;
-        let mut c = Self { ctrl: BufReader::new(tcp), peer: addr.ip(), dur, broken: false };
+    pub async fn connect(
+        addr: SocketAddr,
+        user: &str,
+        pass: &str,
+        dur: Duration,
+    ) -> Result<Self, FtpError> {
+        let tcp = timeout(dur, TcpStream::connect(addr))
+            .await
+            .map_err(|_| FtpError::Timeout)??;
+        let mut c = Self {
+            ctrl: BufReader::new(tcp),
+            peer: addr.ip(),
+            dur,
+            broken: false,
+        };
         let greet = c.read_reply().await.map_err(|e| match e {
             FtpError::Protocol(m) => FtpError::NotFtp(m),
             o => o,
@@ -117,10 +134,15 @@ impl FtpClient {
         timeout(self.dur, async {
             let first = read_line_limited(&mut self.ctrl).await?;
             let b = first.as_bytes();
-            if b.len() < 4 || !b[..3].iter().all(u8::is_ascii_digit) || (b[3] != b' ' && b[3] != b'-') {
+            if b.len() < 4
+                || !b[..3].iter().all(u8::is_ascii_digit)
+                || (b[3] != b' ' && b[3] != b'-')
+            {
                 return Err(FtpError::Protocol(clean(&first)));
             }
-            let code: u16 = first[..3].parse().map_err(|_| FtpError::Protocol(clean(&first)))?;
+            let code: u16 = first[..3]
+                .parse()
+                .map_err(|_| FtpError::Protocol(clean(&first)))?;
             let mut text = clean(&first[4..]);
             if b[3] == b'-' {
                 let end = format!("{code} ");
@@ -146,7 +168,13 @@ impl FtpClient {
         if line.contains(['\r', '\n', '\0']) {
             return Err(FtpError::Protocol("illegal characters in command".into()));
         }
-        let r = timeout(self.dur, self.ctrl.get_mut().write_all(format!("{line}\r\n").as_bytes())).await;
+        let r = timeout(
+            self.dur,
+            self.ctrl
+                .get_mut()
+                .write_all(format!("{line}\r\n").as_bytes()),
+        )
+        .await;
         match r {
             Err(_) => {
                 self.broken = true;
@@ -166,14 +194,25 @@ impl FtpClient {
         if ok.contains(&r.code) {
             Ok(r)
         } else {
-            Err(FtpError::Rejected { code: r.code, text: r.text })
+            Err(FtpError::Rejected {
+                code: r.code,
+                text: r.text,
+            })
         }
     }
 
     async fn pasv(&mut self) -> Result<TcpStream, FtpError> {
         let r = self.expect("PASV", &[227]).await?;
-        let inner = r.text.split_once('(').and_then(|(_, t)| t.split_once(')')).map(|(i, _)| i).ok_or_else(|| FtpError::Protocol("bad PASV reply".into()))?;
-        let n: Vec<u16> = inner.split(',').filter_map(|x| x.trim().parse().ok()).collect();
+        let inner = r
+            .text
+            .split_once('(')
+            .and_then(|(_, t)| t.split_once(')'))
+            .map(|(i, _)| i)
+            .ok_or_else(|| FtpError::Protocol("bad PASV reply".into()))?;
+        let n: Vec<u16> = inner
+            .split(',')
+            .filter_map(|x| x.trim().parse().ok())
+            .collect();
         if n.len() != 6 || n.iter().any(|v| *v > 255) {
             return Err(FtpError::Protocol("bad PASV reply".into()));
         }
@@ -182,7 +221,13 @@ impl FtpClient {
             return Err(FtpError::Protocol("bad PASV port".into()));
         }
         // Deliberately ignore the advertised IP: always the control peer.
-        timeout(self.dur, TcpStream::connect(SocketAddr::new(self.peer, port))).await.map_err(|_| FtpError::Timeout)?.map_err(Into::into)
+        timeout(
+            self.dur,
+            TcpStream::connect(SocketAddr::new(self.peer, port)),
+        )
+        .await
+        .map_err(|_| FtpError::Timeout)?
+        .map_err(Into::into)
     }
 
     pub async fn pwd(&mut self) -> Result<String, FtpError> {
@@ -194,12 +239,17 @@ impl FtpClient {
         let mut data = self.pasv().await?;
         let r = self.cmd(&format!("LIST {path}")).await?;
         if r.code != 125 && r.code != 150 {
-            return Err(FtpError::Rejected { code: r.code, text: r.text });
+            return Err(FtpError::Rejected {
+                code: r.code,
+                text: r.text,
+            });
         }
         let mut buf = Vec::new();
         let mut chunk = [0u8; 8192];
         loop {
-            let n = timeout(self.dur, data.read(&mut chunk)).await.map_err(|_| FtpError::Timeout)??;
+            let n = timeout(self.dur, data.read(&mut chunk))
+                .await
+                .map_err(|_| FtpError::Timeout)??;
             if n == 0 {
                 break;
             }
@@ -212,16 +262,27 @@ impl FtpClient {
         drop(data);
         let done = self.read_reply().await?;
         if done.code != 226 && done.code != 250 {
-            return Err(FtpError::Rejected { code: done.code, text: done.text });
+            return Err(FtpError::Rejected {
+                code: done.code,
+                text: done.text,
+            });
         }
         self.expect("TYPE I", &[200]).await?;
         let text = String::from_utf8_lossy(&buf);
-        Ok(text.lines().filter_map(parse_list_line).take(MAX_ENTRIES).collect())
+        Ok(text
+            .lines()
+            .filter_map(parse_list_line)
+            .take(MAX_ENTRIES)
+            .collect())
     }
 
     pub async fn size(&mut self, path: &str) -> Result<Option<u64>, FtpError> {
         let r = self.cmd(&format!("SIZE {path}")).await?;
-        Ok(if r.code == 213 { r.text.trim().parse().ok() } else { None })
+        Ok(if r.code == 213 {
+            r.text.trim().parse().ok()
+        } else {
+            None
+        })
     }
 
     pub async fn mkd(&mut self, path: &str) -> Result<(), FtpError> {
@@ -240,11 +301,20 @@ impl FtpClient {
 
     /// Streams `remote` into `out`. `progress(bytes_so_far)` is called per chunk. On cancel the
     /// connection is dropped and this client must not be reused.
-    pub async fn download<W: AsyncWrite + Unpin>(&mut self, remote: &str, out: &mut W, progress: &(dyn Fn(u64) + Sync), cancel: &AtomicBool) -> Result<u64, FtpError> {
+    pub async fn download<W: AsyncWrite + Unpin>(
+        &mut self,
+        remote: &str,
+        out: &mut W,
+        progress: &(dyn Fn(u64) + Sync),
+        cancel: &AtomicBool,
+    ) -> Result<u64, FtpError> {
         let mut data = self.pasv().await?;
         let r = self.cmd(&format!("RETR {remote}")).await?;
         if r.code != 125 && r.code != 150 {
-            return Err(FtpError::Rejected { code: r.code, text: r.text });
+            return Err(FtpError::Rejected {
+                code: r.code,
+                text: r.text,
+            });
         }
         let mut total = 0u64;
         let mut buf = vec![0u8; CHUNK];
@@ -272,18 +342,33 @@ impl FtpClient {
             progress(total);
         }
         drop(data);
-        let done = self.read_reply().await.inspect_err(|_| self.broken = true)?;
+        let done = self
+            .read_reply()
+            .await
+            .inspect_err(|_| self.broken = true)?;
         if done.code != 226 && done.code != 250 {
-            return Err(FtpError::Rejected { code: done.code, text: done.text });
+            return Err(FtpError::Rejected {
+                code: done.code,
+                text: done.text,
+            });
         }
         Ok(total)
     }
 
-    pub async fn upload<R: AsyncRead + Unpin>(&mut self, input: &mut R, remote: &str, progress: &(dyn Fn(u64) + Sync), cancel: &AtomicBool) -> Result<u64, FtpError> {
+    pub async fn upload<R: AsyncRead + Unpin>(
+        &mut self,
+        input: &mut R,
+        remote: &str,
+        progress: &(dyn Fn(u64) + Sync),
+        cancel: &AtomicBool,
+    ) -> Result<u64, FtpError> {
         let mut data = self.pasv().await?;
         let r = self.cmd(&format!("STOR {remote}")).await?;
         if r.code != 125 && r.code != 150 {
-            return Err(FtpError::Rejected { code: r.code, text: r.text });
+            return Err(FtpError::Rejected {
+                code: r.code,
+                text: r.text,
+            });
         }
         let mut total = 0u64;
         let mut buf = vec![0u8; CHUNK];
@@ -312,9 +397,15 @@ impl FtpClient {
         }
         let _ = data.shutdown().await;
         drop(data);
-        let done = self.read_reply().await.inspect_err(|_| self.broken = true)?;
+        let done = self
+            .read_reply()
+            .await
+            .inspect_err(|_| self.broken = true)?;
         if done.code != 226 && done.code != 250 {
-            return Err(FtpError::Rejected { code: done.code, text: done.text });
+            return Err(FtpError::Rejected {
+                code: done.code,
+                text: done.text,
+            });
         }
         Ok(total)
     }
@@ -342,11 +433,19 @@ pub fn parse_list_line(line: &str) -> Option<Entry> {
         rest = &rest[end..];
     }
     let name = rest.trim_start();
-    let name = if kind == Kind::Link { name.split(" -> ").next().unwrap_or(name) } else { name };
+    let name = if kind == Kind::Link {
+        name.split(" -> ").next().unwrap_or(name)
+    } else {
+        name
+    };
     if !valid_name(name) {
         return None;
     }
-    Some(Entry { name: name.to_owned(), kind, size: tok[4].parse().unwrap_or(0) })
+    Some(Entry {
+        name: name.to_owned(),
+        kind,
+        size: tok[4].parse().unwrap_or(0),
+    })
 }
 
 /// Capability probe: only a completed FTP greeting + login + directory listing counts.
@@ -357,15 +456,23 @@ pub async fn probe(addr: SocketAddr, user: &str, pass: &str, dur: Duration) -> F
             // Could the TCP port at least be opened? Distinguish "closed" from "open but not FTP".
             return match timeout(dur, TcpStream::connect(addr)).await {
                 Ok(Ok(_)) => FtpFact::PortOpenOnly,
-                _ => FtpFact::Unreachable { detail: "no service answered on that port".into() },
+                _ => FtpFact::Unreachable {
+                    detail: "no service answered on that port".into(),
+                },
             };
         }
         Err(FtpError::AuthFailed) => return FtpFact::AuthFailed,
-        Err(e) => return FtpFact::Unreachable { detail: e.to_string() },
+        Err(e) => {
+            return FtpFact::Unreachable {
+                detail: e.to_string(),
+            }
+        }
     };
     let out = match c.list("/").await {
         Ok(_) => FtpFact::Connected { writable: None },
-        Err(e) => FtpFact::Unreachable { detail: format!("login worked but listing failed: {e}") },
+        Err(e) => FtpFact::Unreachable {
+            detail: format!("login worked but listing failed: {e}"),
+        },
     };
     c.quit().await;
     out
@@ -396,10 +503,30 @@ mod tests {
     #[test]
     fn parses_list_lines() {
         let e = parse_list_line("-rw-r--r--   1 ftp  ftp   1234 Jan  1 00:00 my file.pkg").unwrap();
-        assert_eq!((e.name.as_str(), e.kind, e.size), ("my file.pkg", Kind::File, 1234));
-        assert_eq!(parse_list_line("drwxr-xr-x 2 u g 0 Jan 1 12:00 data").unwrap().kind, Kind::Dir);
-        assert_eq!(parse_list_line("lrwxrwxrwx 1 u g 4 Jan 1 12:00 a -> /etc/passwd").unwrap().name, "a");
-        for bad in ["", "total 4", "-rw-r--r-- 1 u g 1 Jan 1 00:00 ../evil", "-rw-r--r-- 1 u g 1 Jan 1 00:00 a/b", "-rw-r--r-- 1 u g 1 Jan 1 00:00 ..", "garbage"] {
+        assert_eq!(
+            (e.name.as_str(), e.kind, e.size),
+            ("my file.pkg", Kind::File, 1234)
+        );
+        assert_eq!(
+            parse_list_line("drwxr-xr-x 2 u g 0 Jan 1 12:00 data")
+                .unwrap()
+                .kind,
+            Kind::Dir
+        );
+        assert_eq!(
+            parse_list_line("lrwxrwxrwx 1 u g 4 Jan 1 12:00 a -> /etc/passwd")
+                .unwrap()
+                .name,
+            "a"
+        );
+        for bad in [
+            "",
+            "total 4",
+            "-rw-r--r-- 1 u g 1 Jan 1 00:00 ../evil",
+            "-rw-r--r-- 1 u g 1 Jan 1 00:00 a/b",
+            "-rw-r--r-- 1 u g 1 Jan 1 00:00 ..",
+            "garbage",
+        ] {
             assert!(parse_list_line(bad).is_none(), "{bad:?}");
         }
     }
@@ -407,7 +534,10 @@ mod tests {
     #[tokio::test]
     async fn non_ftp_banner_is_port_open_only() {
         let a = hostile(b"SSH-2.0-OpenSSH_9.9\r\n".to_vec(), true).await;
-        assert!(matches!(FtpClient::connect(a, "a", "b", T).await, Err(FtpError::NotFtp(_))));
+        assert!(matches!(
+            FtpClient::connect(a, "a", "b", T).await,
+            Err(FtpError::NotFtp(_))
+        ));
         let a = hostile(b"SSH-2.0-OpenSSH_9.9\r\n".to_vec(), true).await;
         assert_eq!(probe(a, "a", "b", T).await, FtpFact::PortOpenOnly);
     }
@@ -423,7 +553,10 @@ mod tests {
         let l = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let a = l.local_addr().unwrap();
         drop(l);
-        assert!(matches!(probe(a, "a", "b", T).await, FtpFact::Unreachable { .. }));
+        assert!(matches!(
+            probe(a, "a", "b", T).await,
+            FtpFact::Unreachable { .. }
+        ));
     }
 
     #[tokio::test]
@@ -449,9 +582,17 @@ mod tests {
             use tokio::io::AsyncReadExt;
             loop {
                 let n = s.read(&mut b).await.unwrap_or(0);
-                if n == 0 { return; }
+                if n == 0 {
+                    return;
+                }
                 let t = String::from_utf8_lossy(&b[..n]).to_string();
-                let r = if t.starts_with("USER") { "331 pw\r\n" } else if t.starts_with("PASS") { "230 ok\r\n" } else { "200 ok\r\n" };
+                let r = if t.starts_with("USER") {
+                    "331 pw\r\n"
+                } else if t.starts_with("PASS") {
+                    "230 ok\r\n"
+                } else {
+                    "200 ok\r\n"
+                };
                 s.write_all(r.as_bytes()).await.unwrap();
             }
         });

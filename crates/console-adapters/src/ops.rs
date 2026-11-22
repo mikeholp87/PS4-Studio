@@ -73,7 +73,9 @@ pub async fn plan(c: &mut FtpClient, policy: &Policy, op: RemoteOp) -> Result<Pl
             }
             let meta = std::fs::metadata(&local)?;
             if !meta.is_file() {
-                return Err(OpError::Refused("Only regular files can be uploaded.".into()));
+                return Err(OpError::Refused(
+                    "Only regular files can be uploaded.".into(),
+                ));
             }
             let existing = c.size(&remote).await?;
             let mut warnings = vec!["FTP is not encrypted: the file and any login travel in clear text on your network.".to_string()];
@@ -107,7 +109,14 @@ pub async fn plan(c: &mut FtpClient, policy: &Policy, op: RemoteOp) -> Result<Pl
             if exists(c, &path).await? {
                 return Err(OpError::Refused("That folder already exists.".into()));
             }
-            Ok(Plan { changes: vec![format!("Create folder {path}")], warnings: vec![], recovery: format!("To undo, remove the empty folder {path}."), backup_remote: None, overwrites: false, op: RemoteOp::Mkdir { path } })
+            Ok(Plan {
+                changes: vec![format!("Create folder {path}")],
+                warnings: vec![],
+                recovery: format!("To undo, remove the empty folder {path}."),
+                backup_remote: None,
+                overwrites: false,
+                op: RemoteOp::Mkdir { path },
+            })
         }
         RemoteOp::Delete { path, dir } => {
             let path = policy.check_write(&path)?;
@@ -119,7 +128,10 @@ pub async fn plan(c: &mut FtpClient, policy: &Policy, op: RemoteOp) -> Result<Pl
             let backup_remote = match size {
                 Some(sz) if sz <= MAX_BACKUP_BYTES => Some(path.clone()),
                 Some(_) => {
-                    warnings.push("The file is over the backup limit and will be deleted WITHOUT a backup.".into());
+                    warnings.push(
+                        "The file is over the backup limit and will be deleted WITHOUT a backup."
+                            .into(),
+                    );
                     None
                 }
                 None => {
@@ -128,8 +140,15 @@ pub async fn plan(c: &mut FtpClient, policy: &Policy, op: RemoteOp) -> Result<Pl
                 }
             };
             Ok(Plan {
-                recovery: if backup_remote.is_some() { "Re-upload the file from the saved backup copy.".into() } else { "No automatic recovery is available.".into() },
-                changes: vec![format!("Delete {} {path}", if dir { "folder" } else { "file" })],
+                recovery: if backup_remote.is_some() {
+                    "Re-upload the file from the saved backup copy.".into()
+                } else {
+                    "No automatic recovery is available.".into()
+                },
+                changes: vec![format!(
+                    "Delete {} {path}",
+                    if dir { "folder" } else { "file" }
+                )],
                 warnings,
                 backup_remote,
                 overwrites: false,
@@ -139,12 +158,23 @@ pub async fn plan(c: &mut FtpClient, policy: &Policy, op: RemoteOp) -> Result<Pl
         RemoteOp::Rename { from, to } => {
             let (from, to) = (policy.check_write(&from)?, policy.check_write(&to)?);
             if !exists(c, &from).await? {
-                return Err(OpError::Refused("The item to rename does not exist.".into()));
+                return Err(OpError::Refused(
+                    "The item to rename does not exist.".into(),
+                ));
             }
             if exists(c, &to).await? {
-                return Err(OpError::Refused("An item with the new name already exists.".into()));
+                return Err(OpError::Refused(
+                    "An item with the new name already exists.".into(),
+                ));
             }
-            Ok(Plan { changes: vec![format!("Rename {from} to {to}")], warnings: vec![], recovery: format!("To undo, rename {to} back to {from}."), backup_remote: None, overwrites: false, op: RemoteOp::Rename { from, to } })
+            Ok(Plan {
+                changes: vec![format!("Rename {from} to {to}")],
+                warnings: vec![],
+                recovery: format!("To undo, rename {to} back to {from}."),
+                backup_remote: None,
+                overwrites: false,
+                op: RemoteOp::Rename { from, to },
+            })
         }
     }
 }
@@ -170,18 +200,27 @@ async fn backup_remote(c: &mut FtpClient, remote: &str, dir: &Path) -> Result<Pa
         std::fs::create_dir_all(p)?;
     }
     let mut f = tokio::fs::File::create(&dest).await?;
-    c.download(remote, &mut f, &|_| {}, &AtomicBool::new(false)).await?;
+    c.download(remote, &mut f, &|_| {}, &AtomicBool::new(false))
+        .await?;
     Ok(dest)
 }
 
 /// APPLY + VERIFY. Re-validates the plan against policy (a plan is data, not authority).
-pub async fn apply(c: &mut FtpClient, policy: &Policy, plan: &Plan, ctx: &ApplyCtx<'_>) -> Result<Outcome, OpError> {
+pub async fn apply(
+    c: &mut FtpClient,
+    policy: &Policy,
+    plan: &Plan,
+    ctx: &ApplyCtx<'_>,
+) -> Result<Outcome, OpError> {
     let mut lines = Vec::new();
     let mut backup = None;
     if let Some(r) = &plan.backup_remote {
         policy.check_write(r)?;
         let b = backup_remote(c, r, ctx.backup_dir).await?;
-        lines.push(format!("Saved a copy of the existing file to {}", b.display()));
+        lines.push(format!(
+            "Saved a copy of the existing file to {}",
+            b.display()
+        ));
         backup = Some(b);
     }
     let verified = match &plan.op {
@@ -206,7 +245,11 @@ pub async fn apply(c: &mut FtpClient, policy: &Policy, plan: &Plan, ctx: &ApplyC
         }
         RemoteOp::Delete { path, dir } => {
             let path = policy.check_write(path)?;
-            if *dir { c.rmd(&path).await? } else { c.dele(&path).await? }
+            if *dir {
+                c.rmd(&path).await?
+            } else {
+                c.dele(&path).await?
+            }
             lines.push(format!("Deleted {path}"));
             !exists(c, &path).await?
         }
@@ -217,13 +260,28 @@ pub async fn apply(c: &mut FtpClient, policy: &Policy, plan: &Plan, ctx: &ApplyC
             exists(c, &to).await? && !exists(c, &from).await?
         }
     };
-    lines.push(if verified { "Verified: the console shows the expected result.".into() } else { "Could not verify the result. Check the console file list.".into() });
-    Ok(Outcome { lines, backup, verified, recovery: plan.recovery.clone() })
+    lines.push(if verified {
+        "Verified: the console shows the expected result.".into()
+    } else {
+        "Could not verify the result. Check the console file list.".into()
+    });
+    Ok(Outcome {
+        lines,
+        backup,
+        verified,
+        recovery: plan.recovery.clone(),
+    })
 }
 
 /// Downloads to the first free name in `local_dir` via a temporary file; never overwrites, never
 /// sets an executable bit. The remote basename must be a plain name.
-pub async fn download_to(c: &mut FtpClient, remote: &str, local_dir: &Path, progress: &(dyn Fn(u64) + Sync), cancel: &AtomicBool) -> Result<PathBuf, OpError> {
+pub async fn download_to(
+    c: &mut FtpClient,
+    remote: &str,
+    local_dir: &Path,
+    progress: &(dyn Fn(u64) + Sync),
+    cancel: &AtomicBool,
+) -> Result<PathBuf, OpError> {
     use std::os::unix::fs::OpenOptionsExt;
     let remote = normalize(remote)?;
     let (_, name) = parent_and_name(&remote);
@@ -231,7 +289,9 @@ pub async fn download_to(c: &mut FtpClient, remote: &str, local_dir: &Path, prog
         return Err(OpError::Refused("Invalid file name.".into()));
     }
     if !local_dir.is_dir() {
-        return Err(OpError::Refused("The destination folder does not exist.".into()));
+        return Err(OpError::Refused(
+            "The destination folder does not exist.".into(),
+        ));
     }
     let mut dest = local_dir.join(&name);
     let mut n = 1;
@@ -239,8 +299,17 @@ pub async fn download_to(c: &mut FtpClient, remote: &str, local_dir: &Path, prog
         dest = local_dir.join(format!("{name} ({n})"));
         n += 1;
     }
-    let tmp = dest.with_file_name(format!(".{}.part", dest.file_name().and_then(|s| s.to_str()).unwrap_or("download")));
-    let file = std::fs::OpenOptions::new().write(true).create_new(true).mode(0o644).open(&tmp)?;
+    let tmp = dest.with_file_name(format!(
+        ".{}.part",
+        dest.file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("download")
+    ));
+    let file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .mode(0o644)
+        .open(&tmp)?;
     let mut f = tokio::fs::File::from_std(file);
     let res = c.download(&remote, &mut f, progress, cancel).await;
     drop(f);

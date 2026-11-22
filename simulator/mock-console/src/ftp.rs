@@ -18,29 +18,59 @@ pub struct SimFs {
 impl SimFs {
     fn seeded() -> Self {
         let fs = SimFs::default();
-        for d in ["/", "/data", "/data/pkg", "/data/homebrew", "/user", "/system"] {
+        for d in [
+            "/",
+            "/data",
+            "/data/pkg",
+            "/data/homebrew",
+            "/user",
+            "/system",
+        ] {
             fs.dirs.lock().unwrap().insert(d.into());
         }
-        fs.files.lock().unwrap().insert("/data/homebrew/readme.txt".into(), b"simulated file".to_vec());
-        fs.files.lock().unwrap().insert("/system/sys.dat".into(), vec![0u8; 16]);
+        fs.files.lock().unwrap().insert(
+            "/data/homebrew/readme.txt".into(),
+            b"simulated file".to_vec(),
+        );
+        fs.files
+            .lock()
+            .unwrap()
+            .insert("/system/sys.dat".into(), vec![0u8; 16]);
         fs
     }
 
     fn children(&self, dir: &str) -> Vec<String> {
-        let prefix = if dir == "/" { "/".to_string() } else { format!("{dir}/") };
-        let direct = |p: &str| p.strip_prefix(&prefix).is_some_and(|r| !r.is_empty() && !r.contains('/'));
+        let prefix = if dir == "/" {
+            "/".to_string()
+        } else {
+            format!("{dir}/")
+        };
+        let direct = |p: &str| {
+            p.strip_prefix(&prefix)
+                .is_some_and(|r| !r.is_empty() && !r.contains('/'))
+        };
         let mut out = Vec::new();
         for d in self.dirs.lock().unwrap().iter().filter(|p| direct(p)) {
-            out.push(format!("drwxr-xr-x 2 sim sim 0 Jan  1 00:00 {}", &d[prefix.len()..]));
+            out.push(format!(
+                "drwxr-xr-x 2 sim sim 0 Jan  1 00:00 {}",
+                &d[prefix.len()..]
+            ));
         }
         for (f, c) in self.files.lock().unwrap().iter().filter(|(p, _)| direct(p)) {
-            out.push(format!("-rw-r--r-- 1 sim sim {} Jan  1 00:00 {}", c.len(), &f[prefix.len()..]));
+            out.push(format!(
+                "-rw-r--r-- 1 sim sim {} Jan  1 00:00 {}",
+                c.len(),
+                &f[prefix.len()..]
+            ));
         }
         out
     }
 }
 
-pub async fn serve_ftp(scenario_id: &str, bind: SocketAddr) -> std::io::Result<(SocketAddr, tokio::task::JoinHandle<()>, Arc<SimFs>)> {
+pub async fn serve_ftp(
+    scenario_id: &str,
+    bind: SocketAddr,
+) -> std::io::Result<(SocketAddr, tokio::task::JoinHandle<()>, Arc<SimFs>)> {
     let sc = scenario(scenario_id).ok_or_else(|| std::io::Error::other("unknown scenario"))?;
     let l = TcpListener::bind(bind).await?;
     let addr = l.local_addr()?;
@@ -49,7 +79,11 @@ pub async fn serve_ftp(scenario_id: &str, bind: SocketAddr) -> std::io::Result<(
     let h = tokio::spawn(async move {
         loop {
             let Ok((s, _)) = l.accept().await else { return };
-            let (fs, behavior, auth_fail) = (fs2.clone(), sc.behavior.clone(), sc.facts.ftp == FtpFact::AuthFailed);
+            let (fs, behavior, auth_fail) = (
+                fs2.clone(),
+                sc.behavior.clone(),
+                sc.facts.ftp == FtpFact::AuthFailed,
+            );
             tokio::spawn(async move {
                 let _ = session(s, fs, behavior, auth_fail).await;
             });
@@ -58,11 +92,17 @@ pub async fn serve_ftp(scenario_id: &str, bind: SocketAddr) -> std::io::Result<(
     Ok((addr, h, fs))
 }
 
-async fn session(s: TcpStream, fs: Arc<SimFs>, behavior: Behavior, auth_fail: bool) -> std::io::Result<()> {
+async fn session(
+    s: TcpStream,
+    fs: Arc<SimFs>,
+    behavior: Behavior,
+    auth_fail: bool,
+) -> std::io::Result<()> {
     let local_ip = s.local_addr()?.ip();
     let (rd, mut wr) = s.into_split();
     let mut rd = BufReader::new(rd);
-    wr.write_all(b"220 [SIMULATED] FTP service ready\r\n").await?;
+    wr.write_all(b"220 [SIMULATED] FTP service ready\r\n")
+        .await?;
     let mut pasv: Option<TcpListener> = None;
     let mut rnfr: Option<String> = None;
     let mut line = String::new();
@@ -116,9 +156,16 @@ async fn session(s: TcpStream, fs: Arc<SimFs>, behavior: Behavior, auth_fail: bo
                         }
                     }
                     "RETR" => {
-                        let content = fs.files.lock().unwrap().get(arg).cloned().unwrap_or_default();
+                        let content = fs
+                            .files
+                            .lock()
+                            .unwrap()
+                            .get(arg)
+                            .cloned()
+                            .unwrap_or_default();
                         if let Behavior::TransferInterrupts { after_bytes } = behavior {
-                            data.write_all(&content[..content.len().min(after_bytes as usize)]).await?;
+                            data.write_all(&content[..content.len().min(after_bytes as usize)])
+                                .await?;
                             return Ok(()); // drop both connections
                         }
                         data.write_all(&content).await?;
@@ -155,16 +202,26 @@ async fn session(s: TcpStream, fs: Arc<SimFs>, behavior: Behavior, auth_fail: bo
                 Some(c) => format!("213 {}", c.len()),
                 None => "550 no such file".into(),
             },
-            "MKD" | "RMD" | "DELE" | "RNFR" | "RNTO" if writes_refused => "550 permission denied".into(),
+            "MKD" | "RMD" | "DELE" | "RNFR" | "RNTO" if writes_refused => {
+                "550 permission denied".into()
+            }
             "MKD" => {
                 fs.dirs.lock().unwrap().insert(arg.to_owned());
                 format!("257 \"{arg}\" created")
             }
             "RMD" => {
-                if fs.dirs.lock().unwrap().remove(arg) { "250 removed".into() } else { "550 no such directory".into() }
+                if fs.dirs.lock().unwrap().remove(arg) {
+                    "250 removed".into()
+                } else {
+                    "550 no such directory".into()
+                }
             }
             "DELE" => {
-                if fs.files.lock().unwrap().remove(arg).is_some() { "250 deleted".into() } else { "550 no such file".into() }
+                if fs.files.lock().unwrap().remove(arg).is_some() {
+                    "250 deleted".into()
+                } else {
+                    "550 no such file".into()
+                }
             }
             "RNFR" => {
                 rnfr = Some(arg.to_owned());

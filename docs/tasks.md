@@ -6,7 +6,7 @@
 - [x] P2 Desktop foundation
 - [x] P3 Connection system
 - [x] P4 Dashboard Studio
-- [ ] P5 Homebrew / files / backups
+- [x] P5 Homebrew / files / backups
 - [ ] P6 Companion
 - [ ] P7 Alt-OS research + simulation
 - [ ] P8 Release engineering
@@ -61,3 +61,10 @@
 - Bug found by e2e + fixed: structuredClone throws on Svelte reactive proxies (add tile did nothing) -> JSON clone + regression test.
 - Limits: image backgrounds unsupported (no URL/file refs by design); exports/imports via native dialog not exercised in automated tests (mock only; dialog code compiled but never run in CI); gamepad path untested with hardware; status widget values are placeholders labelled "preview"; deploying a theme to a PS4 companion is not implemented (needs P6); "profiles" = multiple saved theme files.
 - Next: P5 (FTP adapter + file manager + homebrew list + backups + audit view).
+
+### P5 Homebrew / files / backups — done 2026-11-22
+- Implemented: `console-adapters` (path policy; hardened FTP client with caps, PASV-bounce protection, timeouts, poison-on-failure; safe ops INSPECT→PLAN→APPLY→VERIFY with pre-change backups, `.ps4studio-part` uploads, no-overwrite/no-exec downloads); simulator FTP server honouring scenarios (auth failure, refused writes, storage limit, interruption); `backups` crate (versioned manifest, SHA-256 verify, tamper-safe reads); Tauri commands for files/backups/homebrew with single-use expiring plans, write lock + acknowledgement, cancel, progress events; UI: File Manager (dual pane, lock/unlock, plan dialog, transfer list, cancel), Homebrew (local .pkg inventory, sidecar manifest, SHA-256 verify, trust list, warnings, copy via confirmed flow, history; installed list/install/plugins honestly unavailable), Backups (create/verify/details/restore settings-profiles-themes/save copy/delete, Sony backup guidance, operation history); docs/security.md, docs/connection-protocols.md.
+- Tests: cargo 71 pass (incl. 9 FTP unit/hostile, 7 FTP-vs-simulator, 5 safe-ops, 5 backups, 3 homebrew, 1 real-ACL Tauri IPC end-to-end flow); vitest 28+3; Playwright 20; clippy/fmt/svelte-check/eslint clean.
+- Bugs found+fixed on the way: capability looked verified before any probe in simulator sessions (now unprobed until the user connects); circular Overview gate on "Browse Files".
+- Limits: never run against a real GoldHEN console; credentials session-only (no Secret Service yet); symlink caveat (see security.md); remote files not auto-restorable by design; no pause (service can't); transfer queue is a UI list of sequential operations; `dialog` plugin flows (export/import/pick-folder/save-as) compiled but not exercised in automated tests; installed-homebrew listing, package install trigger and plugin management remain UNSUPPORTED/EXPERIMENTAL per technical-feasibility.md.
+- Next: P6 companion (C source + Rust protocol + mock) then P7 alt-OS docs, P8 release engineering.

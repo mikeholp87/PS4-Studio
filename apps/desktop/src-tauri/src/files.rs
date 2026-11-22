@@ -35,7 +35,12 @@ pub struct FileState {
 impl FileState {
     /// Drops the connection, simulator servers and any pending plans (called on disconnect/switch).
     pub fn reset(&self) {
-        for h in self.sim_servers.lock().map(|mut g| std::mem::take(&mut *g)).unwrap_or_default() {
+        for h in self
+            .sim_servers
+            .lock()
+            .map(|mut g| std::mem::take(&mut *g))
+            .unwrap_or_default()
+        {
             h.abort();
         }
         if let Ok(mut t) = self.target.lock() {
@@ -55,21 +60,49 @@ fn err<E: std::fmt::Display>(e: E) -> String {
 }
 
 #[tauri::command]
-pub async fn files_connect(state: State<'_, AppState>, user: Option<String>, password: Option<String>) -> Result<ConnectionView, String> {
+pub async fn files_connect(
+    state: State<'_, AppState>,
+    user: Option<String>,
+    password: Option<String>,
+) -> Result<ConnectionView, String> {
     state.files.reset();
     let (simulated, scenario, address) = {
         let g = lock(&state.session)?;
         let s = g.as_ref().ok_or("Select a console first.")?;
         (s.facts.simulated, s.scenario_id, s.address)
     };
-    let (user, pass) = (user.filter(|u| !u.is_empty()).unwrap_or_else(|| "anonymous".into()), password.unwrap_or_default());
+    let (user, pass) = (
+        user.filter(|u| !u.is_empty())
+            .unwrap_or_else(|| "anonymous".into()),
+        password.unwrap_or_default(),
+    );
     let addr: SocketAddr = if simulated {
         let id = scenario.ok_or("No simulator scenario.")?;
-        let (a, h, _fs) = ps4studio_mock_console::serve_ftp(id, "127.0.0.1:0".parse().map_err(err)?).await.map_err(err)?;
-        lock(&state.files.sim_servers)?.push(h);
-        a
+        let scripted = ps4studio_mock_console::scenario(id)
+            .map(|sc| sc.facts.ftp)
+            .unwrap_or(FtpFact::NotProbed);
+        if scripted == FtpFact::NotProbed {
+            // This simulated console has no file service: point at a port nobody listens on.
+            let l = tokio::net::TcpListener::bind("127.0.0.1:0")
+                .await
+                .map_err(err)?;
+            let a = l.local_addr().map_err(err)?;
+            drop(l);
+            a
+        } else {
+            let (a, h, _fs) =
+                ps4studio_mock_console::serve_ftp(id, "127.0.0.1:0".parse().map_err(err)?)
+                    .await
+                    .map_err(err)?;
+            lock(&state.files.sim_servers)?.push(h);
+            a
+        }
     } else {
-        let port: u16 = lock(&state.db)?.get_setting("ftp_port").map_err(err)?.and_then(|p| p.parse().ok()).unwrap_or(2121);
+        let port: u16 = lock(&state.db)?
+            .get_setting("ftp_port")
+            .map_err(err)?
+            .and_then(|p| p.parse().ok())
+            .unwrap_or(2121);
         SocketAddr::new(address.ok_or("Console has no address.")?, port)
     };
 
@@ -79,7 +112,9 @@ pub async fn files_connect(state: State<'_, AppState>, user: Option<String>, pas
         fact = ftp::probe(addr, &user, &pass, TIMEOUT).await; // one retry
     }
     if matches!(fact, FtpFact::Connected { .. }) {
-        let c = FtpClient::connect(addr, &user, &pass, TIMEOUT).await.map_err(err)?;
+        let c = FtpClient::connect(addr, &user, &pass, TIMEOUT)
+            .await
+            .map_err(err)?;
         *state.files.client.lock().await = Some(c);
         *lock(&state.files.target)? = Some((addr, user, pass));
     }
@@ -95,7 +130,14 @@ pub async fn files_connect(state: State<'_, AppState>, user: Option<String>, pas
     s.facts.write_unlocked = false; // always start read-only
     let v = view(s);
     drop(g);
-    lock(&state.db)?.audit("files_connect", if simulated { "simulator" } else { "console" }, "unencrypted FTP; read-only", outcome).map_err(err)?;
+    lock(&state.db)?
+        .audit(
+            "files_connect",
+            if simulated { "simulator" } else { "console" },
+            "unencrypted FTP; read-only",
+            outcome,
+        )
+        .map_err(err)?;
     Ok(v)
 }
 
@@ -113,16 +155,28 @@ pub async fn files_disconnect(state: State<'_, AppState>) -> Result<ConnectionVi
 }
 
 /// Opens a fresh control connection when the previous one was poisoned (cancel/failure).
-async fn client<'a>(state: &'a AppState, slot: &'a mut Option<FtpClient>) -> Result<&'a mut FtpClient, String> {
+async fn client<'a>(
+    state: &'a AppState,
+    slot: &'a mut Option<FtpClient>,
+) -> Result<&'a mut FtpClient, String> {
     if slot.is_none() {
-        let t = lock(&state.files.target)?.clone().ok_or("Not connected to a file service. Connect first.")?;
-        *slot = Some(FtpClient::connect(t.0, &t.1, &t.2, TIMEOUT).await.map_err(err)?);
+        let t = lock(&state.files.target)?
+            .clone()
+            .ok_or("Not connected to a file service. Connect first.")?;
+        *slot = Some(
+            FtpClient::connect(t.0, &t.1, &t.2, TIMEOUT)
+                .await
+                .map_err(err)?,
+        );
     }
     slot.as_mut().ok_or_else(|| "Not connected.".to_string())
 }
 
 #[tauri::command]
-pub async fn files_list_remote(state: State<'_, AppState>, path: String) -> Result<Vec<Entry>, String> {
+pub async fn files_list_remote(
+    state: State<'_, AppState>,
+    path: String,
+) -> Result<Vec<Entry>, String> {
     let path = normalize(&path).map_err(err)?;
     let mut g = state.files.client.lock().await;
     let r = client(&state, &mut g).await?.list(&path).await;
@@ -149,13 +203,27 @@ pub fn files_list_local(path: Option<String>) -> Result<LocalListing, String> {
     let dir = std::fs::canonicalize(&dir).map_err(|e| format!("Cannot open folder: {e}"))?;
     let mut entries = Vec::new();
     for e in std::fs::read_dir(&dir).map_err(err)?.flatten().take(5000) {
-        let Ok(name) = e.file_name().into_string() else { continue };
+        let Ok(name) = e.file_name().into_string() else {
+            continue;
+        };
         let Ok(md) = e.metadata() else { continue };
-        let kind = if md.is_dir() { ftp::Kind::Dir } else { ftp::Kind::File };
-        entries.push(Entry { name, kind, size: if md.is_file() { md.len() } else { 0 } });
+        let kind = if md.is_dir() {
+            ftp::Kind::Dir
+        } else {
+            ftp::Kind::File
+        };
+        entries.push(Entry {
+            name,
+            kind,
+            size: if md.is_file() { md.len() } else { 0 },
+        });
     }
     entries.sort_by_key(|a| (a.kind != ftp::Kind::Dir, a.name.to_lowercase()));
-    Ok(LocalListing { path: dir.display().to_string(), parent: dir.parent().map(|p| p.display().to_string()), entries })
+    Ok(LocalListing {
+        path: dir.display().to_string(),
+        parent: dir.parent().map(|p| p.display().to_string()),
+        entries,
+    })
 }
 
 fn dirs_home() -> Option<PathBuf> {
@@ -163,7 +231,11 @@ fn dirs_home() -> Option<PathBuf> {
 }
 
 #[tauri::command]
-pub fn files_set_write_lock(state: State<AppState>, unlocked: bool, acknowledge_unencrypted: bool) -> Result<ConnectionView, String> {
+pub fn files_set_write_lock(
+    state: State<AppState>,
+    unlocked: bool,
+    acknowledge_unencrypted: bool,
+) -> Result<ConnectionView, String> {
     let mut g = lock(&state.session)?;
     let s = g.as_mut().ok_or("Select a console first.")?;
     if unlocked {
@@ -171,13 +243,26 @@ pub fn files_set_write_lock(state: State<AppState>, unlocked: bool, acknowledge_
             return Err("Connect to the file service first.".into());
         }
         if !acknowledge_unencrypted {
-            return Err("You must acknowledge that FTP is unencrypted before enabling writes.".into());
+            return Err(
+                "You must acknowledge that FTP is unencrypted before enabling writes.".into(),
+            );
         }
     }
     s.facts.write_unlocked = unlocked;
     let v = view(s);
     drop(g);
-    lock(&state.db)?.audit(if unlocked { "unlock_writes" } else { "lock_writes" }, "file service", "", "ok").map_err(err)?;
+    lock(&state.db)?
+        .audit(
+            if unlocked {
+                "unlock_writes"
+            } else {
+                "lock_writes"
+            },
+            "file service",
+            "",
+            "ok",
+        )
+        .map_err(err)?;
     Ok(v)
 }
 
@@ -193,24 +278,37 @@ pub async fn files_plan(state: State<'_, AppState>, op: RemoteOp) -> Result<Plan
         let g = lock(&state.session)?;
         let s = g.as_ref().ok_or("Select a console first.")?;
         if !matches!(s.facts.ftp, FtpFact::Connected { .. }) {
-            return Err("File management is unavailable because no supported file service was detected.".into());
+            return Err(
+                "File management is unavailable because no supported file service was detected."
+                    .into(),
+            );
         }
         if !s.facts.write_unlocked {
-            return Err("Writes are locked. Unlock writes for this session to make changes.".into());
+            return Err(
+                "Writes are locked. Unlock writes for this session to make changes.".into(),
+            );
         }
     }
     let mut g = state.files.client.lock().await;
-    let p = ops::plan(client(&state, &mut g).await?, &Policy::default(), op).await.map_err(err)?;
+    let p = ops::plan(client(&state, &mut g).await?, &Policy::default(), op)
+        .await
+        .map_err(err)?;
     drop(g);
     let id = format!(
         "{:x}{:x}",
-        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0),
         state.files.counter.fetch_add(1, Ordering::Relaxed)
     );
     let mut plans = lock(&state.files.plans)?;
     plans.retain(|_, (_, t)| t.elapsed() < PLAN_TTL);
     plans.insert(id.clone(), (p.clone(), Instant::now()));
-    Ok(PlanView { plan_id: id, plan: p })
+    Ok(PlanView {
+        plan_id: id,
+        plan: p,
+    })
 }
 
 #[derive(Serialize, Clone)]
@@ -226,8 +324,14 @@ pub struct ApplyResult {
 
 /// CONFIRMED apply of a stored plan. The plan is consumed (single use) and re-validated by `ops::apply`.
 #[tauri::command]
-pub async fn files_apply(app: AppHandle, state: State<'_, AppState>, plan_id: String) -> Result<ApplyResult, String> {
-    let (plan, created) = lock(&state.files.plans)?.remove(&plan_id).ok_or("That plan has expired or was already used. Review the change again.")?;
+pub async fn files_apply<R: tauri::Runtime>(
+    app: AppHandle<R>,
+    state: State<'_, AppState>,
+    plan_id: String,
+) -> Result<ApplyResult, String> {
+    let (plan, created) = lock(&state.files.plans)?
+        .remove(&plan_id)
+        .ok_or("That plan has expired or was already used. Review the change again.")?;
     if created.elapsed() > PLAN_TTL {
         return Err("That plan has expired. Review the change again.".into());
     }
@@ -247,7 +351,17 @@ pub async fn files_apply(app: AppHandle, state: State<'_, AppState>, plan_id: St
     let mut g = state.files.client.lock().await;
     let res = {
         let c = client(&state, &mut g).await?;
-        ops::apply(c, &Policy::default(), &plan, &ApplyCtx { backup_dir: &tmp, progress: &progress, cancel: &cancel }).await
+        ops::apply(
+            c,
+            &Policy::default(),
+            &plan,
+            &ApplyCtx {
+                backup_dir: &tmp,
+                progress: &progress,
+                cancel: &cancel,
+            },
+        )
+        .await
     };
     let desc = format!("{:?}", plan.op);
     match res {
@@ -255,10 +369,24 @@ pub async fn files_apply(app: AppHandle, state: State<'_, AppState>, plan_id: St
             drop(g);
             // Promote any pre-change copy into a real, verifiable backup (manifest + checksum).
             let mut backup_id = None;
-            if let (Some(path), RemoteOp::Upload { remote, .. } | RemoteOp::Delete { path: remote, .. }) = (&outcome.backup, &plan.op) {
+            if let (
+                Some(path),
+                RemoteOp::Upload { remote, .. } | RemoteOp::Delete { path: remote, .. },
+            ) = (&outcome.backup, &plan.op)
+            {
                 if let Ok(data) = std::fs::read(path) {
                     let root = paths::data_dir().ok_or("no data dir")?.join("backups");
-                    let m = bk::create(&root, &format!("Before change: {remote}"), vec![bk::NewItem { category: bk::Category::RemoteFile, original: remote.clone(), data }], ps4studio_core::db::now()).map_err(err)?;
+                    let m = bk::create(
+                        &root,
+                        &format!("Before change: {remote}"),
+                        vec![bk::NewItem {
+                            category: bk::Category::RemoteFile,
+                            original: remote.clone(),
+                            data,
+                        }],
+                        ps4studio_core::db::now(),
+                    )
+                    .map_err(err)?;
                     backup_id = Some(m.id);
                 }
             }
@@ -268,8 +396,23 @@ pub async fn files_apply(app: AppHandle, state: State<'_, AppState>, plan_id: St
                     *writable = Some(true);
                 }
             }
-            let detail = format!("{} | recovery: {}", outcome.lines.join("; "), outcome.recovery);
-            lock(&state.db)?.audit("files_apply", &desc, &detail, if outcome.verified { "verified" } else { "unverified" }).map_err(err)?;
+            let detail = format!(
+                "{} | recovery: {}",
+                outcome.lines.join("; "),
+                outcome.recovery
+            );
+            lock(&state.db)?
+                .audit(
+                    "files_apply",
+                    &desc,
+                    &detail,
+                    if outcome.verified {
+                        "verified"
+                    } else {
+                        "unverified"
+                    },
+                )
+                .map_err(err)?;
             Ok(ApplyResult { outcome, backup_id })
         }
         Err(e) => {
@@ -284,8 +427,13 @@ pub async fn files_apply(app: AppHandle, state: State<'_, AppState>, plan_id: St
                     }
                 }
             }
-            lock(&state.db)?.audit("files_apply", &desc, &msg, "failed").map_err(err)?;
-            Err(format!("{msg}. Nothing further was changed; check the console file list. Recovery: {}", plan.recovery))
+            lock(&state.db)?
+                .audit("files_apply", &desc, &msg, "failed")
+                .map_err(err)?;
+            Err(format!(
+                "{msg}. Nothing further was changed; check the console file list. Recovery: {}",
+                plan.recovery
+            ))
         }
     }
 }
@@ -297,7 +445,12 @@ pub fn files_cancel(state: State<AppState>) {
 
 /// Downloads a remote file into a local folder (never overwrites; no executable bit).
 #[tauri::command]
-pub async fn files_download(app: AppHandle, state: State<'_, AppState>, remote: String, local_dir: String) -> Result<String, String> {
+pub async fn files_download<R: tauri::Runtime>(
+    app: AppHandle<R>,
+    state: State<'_, AppState>,
+    remote: String,
+    local_dir: String,
+) -> Result<String, String> {
     state.files.cancel.store(false, Ordering::Relaxed);
     let emit = app.clone();
     let progress = move |bytes: u64| {
@@ -307,7 +460,14 @@ pub async fn files_download(app: AppHandle, state: State<'_, AppState>, remote: 
     let mut g = state.files.client.lock().await;
     let res = {
         let c = client(&state, &mut g).await?;
-        ops::download_to(c, &remote, std::path::Path::new(&local_dir), &progress, &cancel).await
+        ops::download_to(
+            c,
+            &remote,
+            std::path::Path::new(&local_dir),
+            &progress,
+            &cancel,
+        )
+        .await
     };
     if res.is_err() {
         *g = None;
@@ -316,11 +476,13 @@ pub async fn files_download(app: AppHandle, state: State<'_, AppState>, remote: 
     let db = lock(&state.db)?;
     match res {
         Ok(p) => {
-            db.audit("files_download", &remote, &p.display().to_string(), "ok").map_err(err)?;
+            db.audit("files_download", &remote, &p.display().to_string(), "ok")
+                .map_err(err)?;
             Ok(p.display().to_string())
         }
         Err(e) => {
-            db.audit("files_download", &remote, &e.to_string(), "failed").map_err(err)?;
+            db.audit("files_download", &remote, &e.to_string(), "failed")
+                .map_err(err)?;
             Err(e.to_string())
         }
     }

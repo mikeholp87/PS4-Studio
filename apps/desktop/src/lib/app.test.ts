@@ -5,7 +5,7 @@ const { app } = await import('./app.svelte')
 
 const conn = (status: 'available' | 'unavailable', reason: string | null) => ({
   profile: { id: 0, name: 'x', model: 'slim' as const, address: null, firmware: { value: null, source: 'unknown' as const }, simulated: true, last_connected: null },
-  scenario_id: 'stock', simulated: true,
+  scenario_id: 'stock', simulated: true, write_unlocked: false,
   capabilities: [{ capability: 'homebrew.ftp_read', tier: 'homebrew' as const, status, reason, evidence: null }],
 })
 

@@ -6,10 +6,12 @@
   import Overview from './routes/Overview.svelte'
   import Connections from './routes/Connections.svelte'
   import Settings from './routes/Settings.svelte'
-  import Pending from './routes/Pending.svelte'
   import RemoteControl from './routes/RemoteControl.svelte'
   import Diagnostics from './routes/Diagnostics.svelte'
   import Studio from './routes/Studio.svelte'
+  import FileManager from './routes/FileManager.svelte'
+  import Homebrew from './routes/Homebrew.svelte'
+  import Backups from './routes/Backups.svelte'
 
   onMount(() => app.init())
 
@@ -32,9 +34,11 @@
       {:else if app.section === 'connections'}<Connections />
       {:else if app.section === 'remote'}<RemoteControl />
       {:else if app.section === 'studio'}<Studio />
+      {:else if app.section === 'files'}<FileManager />
+      {:else if app.section === 'homebrew'}<Homebrew />
+      {:else if app.section === 'backups'}<Backups />
       {:else if app.section === 'diagnostics'}<Diagnostics />
       {:else if app.section === 'settings'}<Settings />
-      {:else}<Pending id={app.section} />
       {/if}
     </main>
   </div>

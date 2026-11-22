@@ -44,7 +44,7 @@
         <button class="danger" onclick={() => app.disconnect()}>Disconnect</button>
         <Gated primary reason={app.blocked('console.remote_play')} onclick={() => app.go('remote')}>Start Remote Play</Gated>
         <button onclick={() => app.go('studio')}>Open Dashboard Studio</button>
-        <Gated reason={app.blocked('homebrew.ftp_read')} onclick={() => app.go('files')}>Browse Files</Gated>
+        <button onclick={() => app.go('files')}>Browse Files</button>
         <button onclick={() => app.go('backups')}>Create Backup</button>
         <button onclick={() => app.go('diagnostics')}>Open Diagnostics</button>
       </div>

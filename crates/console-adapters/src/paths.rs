@@ -42,7 +42,12 @@ pub fn normalize(p: &str) -> Result<String, PathError> {
 
 /// A single file/dir name (no separators).
 pub fn valid_name(n: &str) -> bool {
-    !n.is_empty() && n.len() <= 255 && n != "." && n != ".." && !n.contains('/') && !n.chars().any(|c| c.is_control() || c == '\\')
+    !n.is_empty()
+        && n.len() <= 255
+        && n != "."
+        && n != ".."
+        && !n.contains('/')
+        && !n.chars().any(|c| c.is_control() || c == '\\')
 }
 
 pub fn join(dir: &str, name: &str) -> Result<String, PathError> {
@@ -63,7 +68,16 @@ impl Default for Policy {
     fn default() -> Self {
         Self {
             write_roots: vec!["/data".into()],
-            protected: ["/system", "/system_ex", "/preinst", "/update", "/dev", "/boot"].map(String::from).to_vec(),
+            protected: [
+                "/system",
+                "/system_ex",
+                "/preinst",
+                "/update",
+                "/dev",
+                "/boot",
+            ]
+            .map(String::from)
+            .to_vec(),
         }
     }
 }
@@ -104,26 +118,55 @@ mod tests {
         ] {
             assert_eq!(normalize(bad), Err(e), "{bad:?}");
         }
-        assert_eq!(normalize(&format!("/{}", "a".repeat(2000))), Err(PathError::TooLong));
+        assert_eq!(
+            normalize(&format!("/{}", "a".repeat(2000))),
+            Err(PathError::TooLong)
+        );
     }
 
     #[test]
     fn write_policy() {
         let p = Policy::default();
-        assert_eq!(p.check_write("/data/pkg/app.pkg").unwrap(), "/data/pkg/app.pkg");
-        assert!(matches!(p.check_write("/data"), Err(PathError::OutsideAllowlist(_))), "root itself is not changeable");
-        assert!(matches!(p.check_write("/datax/evil"), Err(PathError::OutsideAllowlist(_))), "prefix trick");
-        assert!(matches!(p.check_write("/system/sys.dat"), Err(PathError::Protected(_))));
-        assert!(matches!(p.check_write("/user/home"), Err(PathError::OutsideAllowlist(_))));
-        assert_eq!(p.check_write("/data/../system/x"), Err(PathError::Traversal));
+        assert_eq!(
+            p.check_write("/data/pkg/app.pkg").unwrap(),
+            "/data/pkg/app.pkg"
+        );
+        assert!(
+            matches!(p.check_write("/data"), Err(PathError::OutsideAllowlist(_))),
+            "root itself is not changeable"
+        );
+        assert!(
+            matches!(
+                p.check_write("/datax/evil"),
+                Err(PathError::OutsideAllowlist(_))
+            ),
+            "prefix trick"
+        );
+        assert!(matches!(
+            p.check_write("/system/sys.dat"),
+            Err(PathError::Protected(_))
+        ));
+        assert!(matches!(
+            p.check_write("/user/home"),
+            Err(PathError::OutsideAllowlist(_))
+        ));
+        assert_eq!(
+            p.check_write("/data/../system/x"),
+            Err(PathError::Traversal)
+        );
         let mut q = Policy::default();
         q.write_roots.push("/system".into());
-        assert!(matches!(q.check_write("/system/x"), Err(PathError::Protected(_))), "protected beats allowlist");
+        assert!(
+            matches!(q.check_write("/system/x"), Err(PathError::Protected(_))),
+            "protected beats allowlist"
+        );
     }
 
     #[test]
     fn names_and_join() {
-        assert!(valid_name("game.pkg") && !valid_name("..") && !valid_name("a/b") && !valid_name(""));
+        assert!(
+            valid_name("game.pkg") && !valid_name("..") && !valid_name("a/b") && !valid_name("")
+        );
         assert_eq!(join("/data/", "x.pkg").unwrap(), "/data/x.pkg");
         assert!(join("/data", "../x").is_err());
     }
