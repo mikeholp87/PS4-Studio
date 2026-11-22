@@ -437,6 +437,96 @@ pub async fn stop_remote_play(state: State<'_, AppState>) -> Result<(), String> 
     Ok(())
 }
 
+fn theme_store() -> Result<ps4studio_core::themes::ThemeStore, String> {
+    Ok(ps4studio_core::themes::ThemeStore::new(
+        paths::data_dir().ok_or("no data directory")?.join("themes"),
+    ))
+}
+
+#[tauri::command]
+pub fn list_themes() -> Result<Vec<ps4studio_core::themes::StoredTheme>, String> {
+    Ok(theme_store()?.list())
+}
+
+/// Saves (create or overwrite) after validating against the shared schema.
+#[tauri::command]
+pub fn save_theme(
+    state: State<AppState>,
+    json: String,
+) -> Result<ps4studio_core::themes::StoredTheme, String> {
+    let t = theme_store()?.save(&json).map_err(|e| e.to_string())?;
+    lock(&state.db)?
+        .audit("save_theme", &t.id, "", "ok")
+        .map_err(|e| e.to_string())?;
+    Ok(t)
+}
+
+#[tauri::command]
+pub fn delete_theme(state: State<AppState>, id: String) -> Result<bool, String> {
+    let removed = theme_store()?.delete(&id).map_err(|e| e.to_string())?;
+    if removed {
+        lock(&state.db)?
+            .audit("delete_theme", &id, "", "ok")
+            .map_err(|e| e.to_string())?;
+    }
+    Ok(removed)
+}
+
+/// The file dialog is opened here, so the webview never supplies a filesystem path.
+#[tauri::command]
+pub async fn export_theme(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    let theme = theme_store()?
+        .get(&id)
+        .map_err(|e| e.to_string())?
+        .ok_or("Save the theme first, then export it.")?;
+    let name = format!("{}.ps4studio-theme.json", theme.id);
+    let picked = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .set_file_name(&name)
+            .add_filter("PS4 Studio theme", &["json"])
+            .blocking_save_file()
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+    let Some(path) = picked else { return Ok(None) };
+    let path = path.into_path().map_err(|e| e.to_string())?;
+    std::fs::write(&path, &theme.json).map_err(|e| e.to_string())?;
+    lock(&state.db)?
+        .audit("export_theme", &theme.id, "", "ok")
+        .map_err(|e| e.to_string())?;
+    Ok(Some(path.display().to_string()))
+}
+
+#[tauri::command]
+pub async fn import_theme(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Option<ps4studio_core::themes::StoredTheme>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    let picked = tauri::async_runtime::spawn_blocking(move || {
+        app.dialog()
+            .file()
+            .add_filter("PS4 Studio theme", &["json"])
+            .blocking_pick_file()
+    })
+    .await
+    .map_err(|e| e.to_string())?;
+    let Some(path) = picked else { return Ok(None) };
+    let path = path.into_path().map_err(|e| e.to_string())?;
+    let text = ps4studio_core::themes::read_import(&path).map_err(|e| e.to_string())?;
+    let t = theme_store()?.import(&text).map_err(|e| e.to_string())?;
+    lock(&state.db)?
+        .audit("import_theme", &t.id, "validated against schema", "ok")
+        .map_err(|e| e.to_string())?;
+    Ok(Some(t))
+}
+
 #[derive(Serialize)]
 pub struct Diagnostics {
     checks: Vec<ps4studio_diagnostics::Check>,

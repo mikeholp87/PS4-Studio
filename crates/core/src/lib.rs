@@ -4,3 +4,4 @@ pub mod capability;
 pub mod db;
 pub mod model;
 pub mod paths;
+pub mod themes;

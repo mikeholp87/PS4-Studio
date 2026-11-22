@@ -1,10 +1,12 @@
 import type { Page } from '@playwright/test'
 import fixtures from './fixtures/scenarios.json' with { type: 'json' }
+import importable from '../../../packages/theme-engine/fixtures/valid/minimal.json' with { type: 'json' }
 
 /** Installs a fake `window.__TAURI_INTERNALS__` implementing the app's commands in memory. */
 export async function mockTauri(page: Page, opts: { chiaki?: boolean } = {}) {
   await page.addInitScript(
-    ({ fx, chiaki }) => {
+    ({ fx, chiaki, imp }) => {
+      const themes: Record<string, string> = {}
       const settings: Record<string, string> = {}
       const profiles: any[] = []
       const audit: any[] = []
@@ -39,6 +41,11 @@ export async function mockTauri(page: Page, opts: { chiaki?: boolean } = {}) {
         discover_lan: () => [{ address: '192.168.1.50', name: 'PS4-TEST', state: 'ready', firmware_hint: '9.00' }],
         remote_play_status: () => ({ installed: chiaki, binary: chiaki ? '/usr/bin/chiaki' : null, nickname: settings.chiaki_nickname ?? null, running: false }),
         run_diagnostics: () => ({ checks: [{ id: 'chiaki', title: 'chiaki-ng (Remote Play)', level: chiaki ? 'pass' : 'warn', detail: chiaki ? 'Found' : 'Not found on PATH or as a Flatpak.', hint: null }] }),
+        list_themes: () => Object.entries(themes).map(([id, json]) => ({ id, name: JSON.parse(json).name, json })),
+        save_theme: (a) => { const t = JSON.parse(a.json); themes[t.id] = a.json; return { id: t.id, name: t.name, json: a.json } },
+        delete_theme: (a) => delete themes[a.id],
+        export_theme: (a) => (themes[a.id] ? `/home/u/${a.id}.ps4studio-theme.json` : null),
+        import_theme: () => { const t = { ...imp, id: 'imported', name: 'Imported theme' }; themes.imported = JSON.stringify(t); return { id: 'imported', name: t.name, json: themes.imported } },
         export_diagnostics: () => '/home/u/.local/share/ps4-studio/reports/diagnostics-1.txt',
       }
       ;(window as any).__TAURI_INTERNALS__ = {
@@ -50,6 +57,6 @@ export async function mockTauri(page: Page, opts: { chiaki?: boolean } = {}) {
         transformCallback: () => 0,
       }
     },
-    { fx: fixtures as any, chiaki: opts.chiaki ?? false },
+    { fx: fixtures as any, chiaki: opts.chiaki ?? false, imp: importable as any },
   )
 }

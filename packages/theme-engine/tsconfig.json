@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "target": "es2023", "module": "esnext", "moduleResolution": "bundler", "strict": true,
+    "resolveJsonModule": true, "skipLibCheck": true, "noEmit": true, "types": ["node"], "lib": ["es2023"]
+  },
+  "include": ["src", "fixtures", "*.ts"]
+}

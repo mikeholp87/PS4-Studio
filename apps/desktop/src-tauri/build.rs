@@ -18,6 +18,11 @@ const COMMANDS: &[&str] = &[
     "stop_remote_play",
     "run_diagnostics",
     "export_diagnostics",
+    "list_themes",
+    "save_theme",
+    "delete_theme",
+    "export_theme",
+    "import_theme",
 ];
 
 fn main() {

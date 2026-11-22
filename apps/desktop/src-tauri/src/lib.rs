@@ -3,6 +3,7 @@ mod commands;
 pub fn run() {
     let state = commands::AppState::open().expect("could not open application database");
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             commands::app_info,
@@ -23,6 +24,11 @@ pub fn run() {
             commands::stop_remote_play,
             commands::run_diagnostics,
             commands::export_diagnostics,
+            commands::list_themes,
+            commands::save_theme,
+            commands::delete_theme,
+            commands::export_theme,
+            commands::import_theme,
         ])
         .run(tauri::generate_context!())
         .expect("error while running PS4 Studio");

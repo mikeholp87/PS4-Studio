@@ -43,6 +43,8 @@ export interface Discovered { address: string; name: string | null; state: 'read
 export interface RemotePlayStatus { installed: boolean; binary: string | null; nickname: string | null; running: boolean }
 export interface Check { id: string; title: string; level: 'pass' | 'warn' | 'fail' | 'info'; detail: string; hint: string | null }
 
+export interface StoredTheme { id: string; name: string; json: string }
+
 export const api = {
   appInfo: () => invoke<AppInfo>('app_info'),
   listScenarios: () => invoke<Scenario[]>('list_scenarios'),
@@ -61,6 +63,11 @@ export const api = {
   startRemotePlay: (nickname: string, fullscreen: boolean) => invoke<void>('start_remote_play', { nickname, fullscreen }),
   stopRemotePlay: () => invoke<void>('stop_remote_play'),
   runDiagnostics: () => invoke<{ checks: Check[] }>('run_diagnostics'),
+  listThemes: () => invoke<StoredTheme[]>('list_themes'),
+  saveTheme: (json: string) => invoke<StoredTheme>('save_theme', { json }),
+  deleteTheme: (id: string) => invoke<boolean>('delete_theme', { id }),
+  exportTheme: (id: string) => invoke<string | null>('export_theme', { id }),
+  importTheme: () => invoke<StoredTheme | null>('import_theme'),
   exportDiagnostics: () => invoke<string>('export_diagnostics'),
 }
 

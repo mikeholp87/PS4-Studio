@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ps4studio.invalid/schema/theme-1.json",
+  "title": "PS4 Studio dashboard theme (schemaVersion 1)",
+  "description": "Pure data. No URLs, scripts, or file references are allowed anywhere in a theme.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "template", "background", "colors", "font", "layout", "navigation", "widgets", "tiles"],
+  "definitions": {
+    "hex": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,39}$" },
+    "label": { "type": "string", "minLength": 1, "maxLength": 32, "pattern": "^[^\\u0000-\\u001f\\u007f]+$" }
+  },
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "$ref": "#/definitions/slug" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[^\\u0000-\\u001f\\u007f]+$" },
+    "template": { "enum": ["minimal", "aurora", "grid", "classic"] },
+    "background": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "from", "to", "angle"],
+      "properties": {
+        "kind": { "enum": ["solid", "gradient"] },
+        "from": { "$ref": "#/definitions/hex" },
+        "to": { "$ref": "#/definitions/hex" },
+        "angle": { "type": "integer", "minimum": 0, "maximum": 360 }
+      }
+    },
+    "colors": {
+      "type": "object", "additionalProperties": false, "required": ["accent", "text", "surface"],
+      "properties": { "accent": { "$ref": "#/definitions/hex" }, "text": { "$ref": "#/definitions/hex" }, "surface": { "$ref": "#/definitions/hex" } }
+    },
+    "font": {
+      "type": "object", "additionalProperties": false, "required": ["family", "scale"],
+      "properties": { "family": { "enum": ["system", "serif", "mono", "rounded"] }, "scale": { "type": "number", "minimum": 0.8, "maximum": 1.4 } }
+    },
+    "layout": {
+      "type": "object", "additionalProperties": false, "required": ["columns", "tileSize", "tileShape"],
+      "properties": {
+        "columns": { "type": "integer", "minimum": 2, "maximum": 8 },
+        "tileSize": { "enum": ["small", "medium", "large"] },
+        "tileShape": { "enum": ["square", "rounded", "circle"] }
+      }
+    },
+    "navigation": {
+      "type": "object", "additionalProperties": false, "required": ["wrapFocus", "showLabels"],
+      "properties": { "wrapFocus": { "type": "boolean" }, "showLabels": { "type": "boolean" } }
+    },
+    "widgets": {
+      "type": "object", "additionalProperties": false, "required": ["clock", "status"],
+      "properties": {
+        "clock": {
+          "type": "object", "additionalProperties": false, "required": ["enabled", "hour24", "position"],
+          "properties": { "enabled": { "type": "boolean" }, "hour24": { "type": "boolean" }, "position": { "enum": ["top-left", "top-right"] } }
+        },
+        "status": {
+          "type": "object", "additionalProperties": false, "required": ["enabled"],
+          "properties": { "enabled": { "type": "boolean" } }
+        }
+      }
+    },
+    "tiles": {
+      "type": "array", "maxItems": 40,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "label", "icon", "color", "kind"],
+        "properties": {
+          "id": { "$ref": "#/definitions/slug" },
+          "label": { "$ref": "#/definitions/label" },
+          "icon": { "enum": ["gamepad", "tv", "music", "film", "globe", "settings", "folder", "store", "users", "camera", "star", "download", "play", "image"] },
+          "color": { "$ref": "#/definitions/hex" },
+          "kind": { "enum": ["app", "shortcut"] }
+        }
+      }
+    }
+  }
+}

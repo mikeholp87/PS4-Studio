@@ -23,6 +23,7 @@ ps4studio-discovery = { path = "../../../crates/discovery" }
 ps4studio-remote-play = { path = "../../../crates/remote-play" }
 ps4studio-diagnostics = { path = "../../../crates/diagnostics" }
 tokio.workspace = true
+tauri-plugin-dialog = "2"
 
 [package.metadata.deb]
 name = "ps4-studio"

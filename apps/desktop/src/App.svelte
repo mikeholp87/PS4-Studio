@@ -9,6 +9,7 @@
   import Pending from './routes/Pending.svelte'
   import RemoteControl from './routes/RemoteControl.svelte'
   import Diagnostics from './routes/Diagnostics.svelte'
+  import Studio from './routes/Studio.svelte'
 
   onMount(() => app.init())
 
@@ -30,6 +31,7 @@
       {#if app.section === 'overview'}<Overview />
       {:else if app.section === 'connections'}<Connections />
       {:else if app.section === 'remote'}<RemoteControl />
+      {:else if app.section === 'studio'}<Studio />
       {:else if app.section === 'diagnostics'}<Diagnostics />
       {:else if app.section === 'settings'}<Settings />
       {:else}<Pending id={app.section} />

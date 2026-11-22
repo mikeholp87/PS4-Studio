@@ -5,7 +5,7 @@
 - [x] P1 Research docs (4 docs written; open items listed in research.md)
 - [x] P2 Desktop foundation
 - [x] P3 Connection system
-- [ ] P4 Dashboard Studio
+- [x] P4 Dashboard Studio
 - [ ] P5 Homebrew / files / backups
 - [ ] P6 Companion
 - [ ] P7 Alt-OS research + simulation
@@ -53,3 +53,11 @@
 - Bug found+fixed in testing: sanitizer skipped IP masking on text preceding a secret keyword.
 - Limits: chiaki-ng not installed here -> Remote Play launch only tested with a fake binary; real discovery never run against a real PS4; broadcast search not run on this LAN; tauri commands themselves have no Rust integration tests (logic is in crates); e2e uses mocked IPC; remote wake not implemented (UNSUPPORTED); connect failure state shown via header "no reply" + Diagnostics.
 - Next: P4 Dashboard Studio (theme-engine package: schema/validator/templates, editor, 1080p preview, import/export).
+
+### P4 Dashboard Studio — done 2026-11-22
+- Implemented: `packages/theme-engine` (single JSON Schema draft-07 `theme.schema.json`; ajv validator; 4 original templates MINIMAL/AURORA/GRID/CLASSIC; pure helpers: fromTemplate/newTheme/add/move/removeTile/moveFocus, proxy-safe clone); Rust `core::themes` (same schema via `jsonschema`, 256 KB cap, slug ids, atomic writes, list skips tampered files, collision-safe import); shared valid/invalid fixture corpus run by BOTH vitest and cargo test (3 valid / 14 invalid incl. CSS injection, URL fields, control chars, traversal ids); 5 new Tauri commands (list/save/delete/export/import) — file dialogs are opened from Rust so the webview never supplies a path; Studio UI: theme list, 1080p scaled TV preview (arrow keys, on-screen D-pad, Gamepad API polled only while a pad exists and the preview is focused/hovered, focus animation, focus-follow scrolling, clock + status(preview) widgets), editor (general, background solid/gradient, colours, font, widgets, navigation, tile add/reorder/remove), save/revert/reset/duplicate/export/import/delete with confirm.
+- Files: packages/theme-engine/**, crates/core/src/themes.rs, apps/desktop/src-tauri/src/{commands.rs,lib.rs}, build.rs, capabilities, apps/desktop/src/{routes/Studio.svelte,lib/components/{DashboardPreview,ThemeEditor}.svelte}, e2e/*
+- Tests: cargo 41 pass; theme-engine vitest 28; desktop vitest 3; Playwright 16 (adds 6 Studio tests); clippy/fmt/svelte-check/eslint clean; real app launched.
+- Bug found by e2e + fixed: structuredClone throws on Svelte reactive proxies (add tile did nothing) -> JSON clone + regression test.
+- Limits: image backgrounds unsupported (no URL/file refs by design); exports/imports via native dialog not exercised in automated tests (mock only; dialog code compiled but never run in CI); gamepad path untested with hardware; status widget values are placeholders labelled "preview"; deploying a theme to a PS4 companion is not implemented (needs P6); "profiles" = multiple saved theme files.
+- Next: P5 (FTP adapter + file manager + homebrew list + backups + audit view).

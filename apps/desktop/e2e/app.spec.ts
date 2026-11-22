@@ -12,7 +12,7 @@ test('first run works offline with no console', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'No console selected' })).toBeVisible()
   await expect(page.getByRole('status')).toHaveText(/Not connected/)
   await nav(page, 'Dashboard Studio').click()
-  await expect(page.getByText('Coming in Phase 4')).toBeVisible()
+  await expect(page.getByRole('application', { name: /Dashboard preview/ })).toBeVisible()
 })
 
 test('simulator: homebrew scenario enables file browsing and is labelled SIMULATED', async ({ page }) => {
@@ -84,4 +84,66 @@ test('diagnostics lists checks and exports a report path', async ({ page }) => {
 test('keyboard shortcut Alt+3 opens Remote Control', async ({ page }) => {
   await page.keyboard.press('Alt+3')
   await expect(page.getByRole('heading', { name: 'Remote Control' })).toBeVisible()
+})
+
+test.describe('Dashboard Studio (offline, no console)', () => {
+  test.beforeEach(async ({ page }) => { await nav(page, 'Dashboard Studio').click() })
+
+  test('keyboard moves focus in the preview and select is preview-only', async ({ page }) => {
+    const tv = page.getByRole('application', { name: /Dashboard preview/ })
+    await tv.focus()
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ArrowRight')
+    await expect(tv.locator('.tile.focused .label')).toHaveText('Music')
+    await page.keyboard.press('Enter')
+    await expect(page.getByText('Nothing is launched.')).toBeVisible()
+  })
+
+  test('edit, save, reload list, export, import, delete', async ({ page }) => {
+    await page.getByRole('button', { name: 'New from template' }).click()
+    await page.getByLabel('Name', { exact: true }).fill('Evening')
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Saved.' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Evening/ })).toBeVisible()
+    await page.getByRole('button', { name: 'Export…' }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Exported to' })).toBeVisible()
+    await page.getByRole('button', { name: 'Import theme…' }).click()
+    await expect(page.getByRole('button', { name: /^Imported theme/ })).toBeVisible()
+    page.once('dialog', (d) => d.accept())
+    await page.getByRole('button', { name: 'Delete' }).click()
+    await expect(page.getByRole('button', { name: /^Imported theme/ })).toHaveCount(0)
+  })
+
+  test('template switch and tile editing update the live preview', async ({ page }) => {
+    await page.getByLabel('Layout template').selectOption('grid')
+    await expect(page.locator('.screen.grid')).toBeVisible()
+    await page.getByLabel('New shortcut label').fill('Netflix-like')
+    await page.getByRole('button', { name: 'Add shortcut' }).click()
+    await expect(page.locator('.screen .tile')).toHaveCount(9)
+    await page.getByRole('button', { name: 'Remove Netflix-like' }).click()
+    await expect(page.locator('.screen .tile')).toHaveCount(8)
+  })
+
+  test('invalid edits block saving with a visible reason', async ({ page }) => {
+    await page.getByLabel('Name', { exact: true }).fill('')
+    await expect(page.getByRole('alert')).toContainText('Cannot save')
+    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeDisabled()
+  })
+
+  test('reset restores template defaults', async ({ page }) => {
+    await page.getByLabel('Layout template').selectOption('grid')
+    await page.getByLabel('Tile shape').selectOption('circle')
+    await page.getByRole('button', { name: 'Reset to template' }).click()
+    await expect(page.getByLabel('Tile shape')).toHaveValue('square')
+  })
+})
+
+test('screenshots of all templates (visual review artefacts)', async ({ page }) => {
+  await nav(page, 'Dashboard Studio').click()
+  for (const t of ['minimal', 'aurora', 'grid', 'classic']) {
+    await page.getByLabel('Layout template').selectOption(t)
+    await page.getByRole('application', { name: /Dashboard preview/ }).focus()
+    await page.keyboard.press('ArrowRight')
+    await page.screenshot({ path: `test-results/studio-${t}.png` })
+  }
 })

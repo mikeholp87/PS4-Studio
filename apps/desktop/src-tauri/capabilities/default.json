@@ -24,6 +24,11 @@
     "allow-start-remote-play",
     "allow-stop-remote-play",
     "allow-run-diagnostics",
-    "allow-export-diagnostics"
+    "allow-export-diagnostics",
+    "allow-list-themes",
+    "allow-save-theme",
+    "allow-delete-theme",
+    "allow-export-theme",
+    "allow-import-theme"
   ]
 }

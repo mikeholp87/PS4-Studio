@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "id": "aurora",
+  "name": "Aurora",
+  "template": "aurora",
+  "background": {
+    "kind": "gradient",
+    "from": "#1b1446",
+    "to": "#0b3a5b",
+    "angle": 135
+  },
+  "colors": {
+    "accent": "#a78bfa",
+    "text": "#ffffff",
+    "surface": "#ffffff"
+  },
+  "font": {
+    "family": "rounded",
+    "scale": 1.0
+  },
+  "layout": {
+    "columns": 6,
+    "tileSize": "large",
+    "tileShape": "rounded"
+  },
+  "navigation": {
+    "wrapFocus": true,
+    "showLabels": true
+  },
+  "widgets": {
+    "clock": {
+      "enabled": true,
+      "hour24": true,
+      "position": "top-left"
+    },
+    "status": {
+      "enabled": true
+    }
+  },
+  "tiles": [
+    {
+      "id": "games",
+      "label": "Games",
+      "icon": "gamepad",
+      "color": "#5b8cff",
+      "kind": "app"
+    },
+    {
+      "id": "media",
+      "label": "Media",
+      "icon": "film",
+      "color": "#9b6bff",
+      "kind": "app"
+    },
+    {
+      "id": "music",
+      "label": "Music",
+      "icon": "music",
+      "color": "#e86bb0",
+      "kind": "app"
+    },
+    {
+      "id": "web",
+      "label": "Browser",
+      "icon": "globe",
+      "color": "#4cc3d9",
+      "kind": "app"
+    },
+    {
+      "id": "library",
+      "label": "Library",
+      "icon": "folder",
+      "color": "#e5a93d",
+      "kind": "app"
+    },
+    {
+      "id": "store",
+      "label": "Store",
+      "icon": "store",
+      "color": "#4cc38a",
+      "kind": "app"
+    },
+    {
+      "id": "friends",
+      "label": "Friends",
+      "icon": "users",
+      "color": "#ef6b6b",
+      "kind": "app"
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "icon": "settings",
+      "color": "#9aa1b2",
+      "kind": "shortcut"
+    }
+  ]
+}

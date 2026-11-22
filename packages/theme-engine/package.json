@@ -1,0 +1,25 @@
+{
+  "name": "@ps4studio/theme-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "eslint": "^9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8",
+    "vitest": "^5.1.1",
+    "@types/node": "^24.19.2"
+  }
+}
