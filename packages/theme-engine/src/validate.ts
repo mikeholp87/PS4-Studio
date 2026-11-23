@@ -1,9 +1,6 @@
-import Ajv from 'ajv'
-import schema from '../theme.schema.json' with { type: 'json' }
+// Precompiled at build time (scripts/gen-validator.mjs): no runtime eval, so it works under a strict CSP.
+import check from './validator.generated.js'
 import type { Theme } from './types'
-
-const ajv = new Ajv({ allErrors: true, strict: true })
-const check = ajv.compile(schema)
 
 export type ValidationResult = { ok: true; theme: Theme } | { ok: false; errors: string[] }
 

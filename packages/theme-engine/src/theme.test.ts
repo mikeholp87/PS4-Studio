@@ -15,6 +15,16 @@ describe('shared corpus (the Rust side runs the same files)', () => {
   })
 })
 
+describe('generated validator', () => {
+  it('is up to date with theme.schema.json (run `pnpm gen` if this fails)', async () => {
+    const { build } = await import('../scripts/gen-validator.mjs')
+    expect(readFileSync(join(__dirname, 'validator.generated.js'), 'utf8')).toBe(build())
+  })
+  it('does not use eval, new Function or require (CSP forbids unsafe-eval; browsers have no require)', () => {
+    expect(readFileSync(join(__dirname, 'validator.generated.js'), 'utf8')).not.toMatch(/new Function|\beval\(|\brequire\(/)
+  })
+})
+
 describe('templates', () => {
   it.each(TEMPLATE_IDS)('%s is valid and original (no urls)', (id) => {
     expect(validateTheme(templates[id]).ok).toBe(true)

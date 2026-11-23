@@ -9,10 +9,8 @@
   "scripts": {
     "check": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "ajv": "^8.17.1"
+    "test": "vitest run",
+    "gen": "node scripts/gen-validator.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9",
@@ -20,6 +18,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8",
     "vitest": "^5.1.1",
-    "@types/node": "^24.19.2"
+    "@types/node": "^24.19.2",
+    "ajv": "^8.17.1"
   }
 }
