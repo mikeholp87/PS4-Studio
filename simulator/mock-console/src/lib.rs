@@ -8,7 +8,7 @@ pub use companion::{serve_companion, SimCompanion, SIM_CODE};
 pub use ftp::{serve_ftp, SimFs};
 
 use ps4studio_core::capability::{
-    CompanionFact, DiscoveryFact, Facts, FtpFact, HostState, COMPANION_PROTOCOL,
+    CompanionFact, DiscoveryFact, DiscoveryVia, Facts, FtpFact, HostState, COMPANION_PROTOCOL,
 };
 use serde::Serialize;
 
@@ -42,6 +42,7 @@ pub struct Scenario {
 
 fn disc(state: HostState) -> Option<DiscoveryFact> {
     Some(DiscoveryFact {
+        via: DiscoveryVia::UdpSearch,
         state,
         host_name: Some(format!("{SIM_LABEL} PS4 Slim")),
         running_title: None,

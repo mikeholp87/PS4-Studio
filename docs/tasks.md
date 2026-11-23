@@ -96,3 +96,9 @@
 - Also added the `custom-protocol` cargo feature (standard Tauri requirement for release embedding). It was NOT the cause of the blank window (a port-1420 listener saw zero requests from the old binary) but is required practice.
 - Verified: release binary rendered in an isolated Xvfb display (welcome dialog, sidebar, working IPC). Gates re-run.
 - Lesson: previous "launched OK" checks only proved the process stayed alive; always look at the rendered window of the packaged build.
+
+### FIX: real PS4 not found by the app — done 2026-11-23 (first real-hardware observation)
+- Symptom: user's powered-on PS4 was not found. A manual scan showed: no UDP 987 reply to broadcast or unicast (several source/versions), no Sony MAC in ARP, BUT one host (AzureWave Wi-Fi MAC) answered ping and had TCP 9295 open; an unauthenticated HTTP request there returned Sony's Remote Play signature (`RP-Version`, `RP-Application-Reason`). So the console was reachable; only the UDP search was ignored.
+- Fix: `discovery::probe_remote_play` + `DiscoveryVia` fact; Connect on a saved console falls back to it. Hostile-input tests (non-HTTP banner, wrong service, endless data, silence, closed port). Verified on the real console with a throwaway harness (service recognised; a non-PS4 host correctly rejected).
+- Limits: the broadcast "Search local network" button still relies on UDP only, so it finds nothing on this console; add by IP. Name/state/firmware are unknown on this path. Root cause of the ignored UDP search NOT determined (local ufw is active and could drop broadcast replies; untested because it needs root). Remote Play launch itself (chiaki-ng) still untested.
+- Next: confirm the app flow end-to-end (add 192.168.0.239 → Connect), install chiaki-ng and try a real Remote Play session.

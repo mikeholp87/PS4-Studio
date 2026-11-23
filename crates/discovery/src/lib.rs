@@ -2,7 +2,7 @@
 //! (see docs/research.md). Replies come from the network and are treated as hostile input:
 //! size-capped, strictly parsed, sanitised, and only accepted from the address we asked.
 
-use ps4studio_core::capability::{DiscoveryFact, HostState};
+use ps4studio_core::capability::{DiscoveryFact, DiscoveryVia, HostState};
 use serde::Serialize;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::time::Duration;
@@ -10,6 +10,8 @@ use tokio::net::UdpSocket;
 use tokio::time::{timeout, Instant};
 
 pub const PORT_PS4: u16 = 987;
+/// TCP port of the PS4 Remote Play service (answers even when the UDP search is ignored).
+pub const REMOTE_PLAY_PORT: u16 = 9295;
 pub const PROTOCOL_VERSION_PS4: &str = "00020020";
 const MAX_REPLY: usize = 2048;
 const MAX_FIELD: usize = 64;
@@ -28,6 +30,7 @@ pub struct DiscoveryReply {
 impl DiscoveryReply {
     pub fn fact(&self) -> DiscoveryFact {
         DiscoveryFact {
+            via: DiscoveryVia::UdpSearch,
             state: self.state,
             host_name: self.host_name.clone(),
             running_title: self.running_title.clone(),
@@ -59,6 +62,8 @@ pub enum ParseError {
 pub enum ProbeError {
     #[error("no reply from console (timed out)")]
     Timeout,
+    #[error("the service on that port is not a PlayStation Remote Play service")]
+    NotRemotePlay,
     #[error("network error: {0}")]
     Io(#[from] std::io::Error),
 }
@@ -154,6 +159,69 @@ pub async fn probe(
         }
     }
     Err(ProbeError::Timeout)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct RemotePlayInfo {
+    pub rp_version: String,
+}
+
+/// Strictly recognises a PlayStation Remote Play reply: an HTTP status line plus an `RP-Version`
+/// header whose value is digits and dots. Anything else is rejected.
+pub fn parse_rp_response(buf: &[u8]) -> Option<RemotePlayInfo> {
+    if buf.len() > MAX_REPLY {
+        return None;
+    }
+    let text = std::str::from_utf8(buf).ok()?;
+    let mut lines = text.split('\n').map(|l| l.trim_end_matches('\r'));
+    if !lines.next()?.starts_with("HTTP/1.1 ") {
+        return None;
+    }
+    for line in lines.take(32) {
+        if let Some((k, v)) = line.split_once(':') {
+            if k.trim().eq_ignore_ascii_case("rp-version") {
+                let v = v.trim();
+                let ok = !v.is_empty()
+                    && v.len() <= 16
+                    && v.chars().all(|c| c.is_ascii_digit() || c == '.');
+                return ok.then(|| RemotePlayInfo {
+                    rp_version: v.to_owned(),
+                });
+            }
+        }
+    }
+    None
+}
+
+/// Sends ONE unauthenticated request (no credentials, no registration key) to the Remote Play port
+/// and checks for the Remote Play signature. Used as a fallback when the UDP search is ignored.
+pub async fn probe_remote_play(
+    addr: SocketAddr,
+    dur: Duration,
+) -> Result<RemotePlayInfo, ProbeError> {
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    let mut s = timeout(dur, tokio::net::TcpStream::connect(addr))
+        .await
+        .map_err(|_| ProbeError::Timeout)??;
+    let req = format!(
+        "GET /sce/rp/session HTTP/1.1\r\nHost: {addr}\r\nUser-Agent: PS4Studio\r\nConnection: close\r\nContent-Length: 0\r\nRP-Version: 10.0\r\n\r\n"
+    );
+    timeout(dur, s.write_all(req.as_bytes()))
+        .await
+        .map_err(|_| ProbeError::Timeout)??;
+    let mut buf = Vec::new();
+    let mut chunk = [0u8; 512];
+    // Read until the header block ends, EOF, or the size cap; every read is time-limited.
+    while buf.len() <= MAX_REPLY && !buf.windows(4).any(|w| w == b"\r\n\r\n") {
+        let n = timeout(dur, s.read(&mut chunk))
+            .await
+            .map_err(|_| ProbeError::Timeout)??;
+        if n == 0 {
+            break;
+        }
+        buf.extend_from_slice(&chunk[..n]);
+    }
+    parse_rp_response(&buf).ok_or(ProbeError::NotRemotePlay)
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -272,6 +340,82 @@ mod tests {
             }
         });
         addr
+    }
+
+    #[test]
+    fn recognises_only_the_remote_play_signature() {
+        let real = b"HTTP/1.1 403 Forbidden\r\nConnection: close\r\nPragma: no-cache\r\nContent-Length: 0\r\nRP-Version: 10.0\r\nRP-Application-Reason: 80108bff\r\n\r\n";
+        assert_eq!(
+            parse_rp_response(real),
+            Some(RemotePlayInfo {
+                rp_version: "10.0".into()
+            })
+        );
+        for bad in [
+            &b"HTTP/1.1 200 OK\r\nServer: nginx\r\n\r\n"[..],
+            b"SSH-2.0-OpenSSH_9.9\r\n",
+            b"HTTP/1.1 403 Forbidden\r\nRP-Version: ../../x\r\n\r\n",
+            b"HTTP/1.1 403 Forbidden\r\nRP-Version: \r\n\r\n",
+            b"\xff\xfe",
+            b"",
+        ] {
+            assert_eq!(parse_rp_response(bad), None, "{bad:?}");
+        }
+        assert_eq!(parse_rp_response(&vec![b'A'; 5000]), None);
+    }
+
+    async fn tcp_server(script: Vec<u8>, linger: bool) -> SocketAddr {
+        use tokio::io::AsyncWriteExt;
+        let l = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = l.local_addr().unwrap();
+        tokio::spawn(async move {
+            let (mut s, _) = l.accept().await.unwrap();
+            let _ = s.write_all(&script).await;
+            if linger {
+                tokio::time::sleep(Duration::from_secs(5)).await;
+            }
+        });
+        addr
+    }
+
+    #[tokio::test]
+    async fn remote_play_probe_accepts_real_and_rejects_hostile_services() {
+        let ok = tcp_server(
+            b"HTTP/1.1 403 Forbidden\r\nRP-Version: 10.0\r\n\r\n".to_vec(),
+            true,
+        )
+        .await;
+        assert_eq!(
+            probe_remote_play(ok, Duration::from_millis(500))
+                .await
+                .unwrap()
+                .rp_version,
+            "10.0"
+        );
+        let web = tcp_server(b"HTTP/1.1 200 OK\r\nServer: x\r\n\r\n".to_vec(), false).await;
+        assert!(matches!(
+            probe_remote_play(web, Duration::from_millis(500)).await,
+            Err(ProbeError::NotRemotePlay)
+        ));
+        let endless = tcp_server(vec![b'A'; 200_000], false).await;
+        assert!(matches!(
+            probe_remote_play(endless, Duration::from_millis(500)).await,
+            Err(ProbeError::NotRemotePlay)
+        ));
+        let silent = tcp_server(vec![], true).await;
+        assert!(matches!(
+            probe_remote_play(silent, Duration::from_millis(200)).await,
+            Err(ProbeError::Timeout)
+        ));
+        let closed = {
+            let l = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let a = l.local_addr().unwrap();
+            drop(l);
+            a
+        };
+        assert!(probe_remote_play(closed, Duration::from_millis(300))
+            .await
+            .is_err());
     }
 
     #[tokio::test]

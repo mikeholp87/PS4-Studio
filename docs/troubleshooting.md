@@ -2,7 +2,7 @@
 
 | Message / symptom | Meaning and fix |
 |---|---|
-| "Console not found. Confirm that the Debian computer and PS4 are on the same local network." | Discovery got no reply. Check same subnet/VLAN, PS4 on or in Rest Mode, no guest-Wi-Fi isolation, firewall allowing UDP 987 replies. A silent console is shown as "no reply", never as "offline". |
+| "Console not found. Confirm that the Debian computer and PS4 are on the same local network." | Discovery got no reply. **Some consoles ignore the UDP search even when Remote Play is on** (seen on a real PS4 on 2026-11-23): when you press Connect on a saved console, the app also checks the Remote Play service (TCP 9295) and treats a genuine Remote Play reply as "console present". "Search local network" uses only the UDP broadcast, so on such a console add it by IP instead (PS4: Settings → Network → View Connection Status). Check same subnet/VLAN, PS4 on or in Rest Mode, no guest-Wi-Fi isolation, firewall allowing UDP 987 replies. A silent console is shown as "no reply", never as "offline". |
 | "chiaki-ng was not found…" | Install chiaki-ng (Flathub or GitHub releases), then reopen Remote Control. |
 | Remote Play launches but fails | Enable Remote Play on the PS4 (Settings → Remote Play Connection Settings), register the console inside chiaki-ng, and use the exact nickname. PS4 Studio never passes your registration key or passcode. |
 | "File management is unavailable because no supported file service was detected." | No FTP service completed a handshake. This only exists on consoles already running a homebrew environment with FTP enabled (documented default port 2121). Check the port under Settings if yours differs (`ftp_port`). |

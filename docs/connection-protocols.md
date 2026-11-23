@@ -11,3 +11,6 @@
 Facts → capabilities is a pure function (`core::capability::evaluate`). A capability is only `available` when a probe produced evidence; an open port alone yields `unavailable`.
 
 Discovery wire format: `SRCH * HTTP/1.1\ndevice-discovery-protocol-version:00020020\n` → reply `HTTP/1.1 200 Ok` (ready) or `620` (standby) with `host-name`, `host-type`, `host-id`, `system-version`, `running-app-*` headers.
+
+## Fallback: Remote Play service probe (TCP 9295)
+Observed on real hardware (2026-11-23, one PS4 on Wi-Fi): the console ignored every UDP 987 search (broadcast, unicast, several source ports) but answered an unauthenticated `GET /sce/rp/session` on TCP 9295 with `HTTP/1.1 403` and an `RP-Version` header. `discovery::probe_remote_play` sends exactly one such request (no credentials, no registration key), accepts only a reply with an `RP-Version` header of digits/dots, caps the reply at 2 KB and times out every read. It yields `DiscoveryFact { via: RemotePlayPort }`: console present, but name, standby/ready state and firmware are unknown. It is used by Connect on a saved console, not by the broadcast search. Why the UDP search was ignored is not established (a host firewall dropping replies is one untested possibility).

@@ -70,8 +70,21 @@ pub enum HostState {
     Standby,
 }
 
+/// How the console was found. Some consoles ignore the UDP search but still run the Remote Play
+/// service, so a console can be found by either route.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DiscoveryVia {
+    #[default]
+    UdpSearch,
+    /// TCP 9295 answered with the Remote Play signature (`RP-Version` header).
+    RemotePlayPort,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DiscoveryFact {
+    #[serde(default)]
+    pub via: DiscoveryVia,
     pub state: HostState,
     pub host_name: Option<String>,
     pub running_title: Option<String>,
@@ -168,10 +181,14 @@ pub fn evaluate(f: &Facts) -> Vec<CapabilityEntry> {
 
     match &f.discovery {
         Some(d) => {
-            let ev = format!(
-                "Console answered the discovery search as {:?}{src}",
-                d.state
-            );
+            let ev = match d.via {
+                DiscoveryVia::UdpSearch => {
+                    format!("Console answered the discovery search as {:?}{src}", d.state)
+                }
+                DiscoveryVia::RemotePlayPort => format!(
+                    "The Remote Play service answered on TCP 9295 (console present; name and state unknown){src}"
+                ),
+            };
             out.push(yes(ConsoleDiscovery, Stock, ev.clone()));
             out.push(yes(ConsoleBasicStatus, Stock, ev));
         }
@@ -376,6 +393,7 @@ mod tests {
         f.remote_play_binary = Some("/usr/bin/chiaki".into());
         assert_eq!(st(&f, Capability::ConsoleRemotePlay), Status::Unavailable);
         f.discovery = Some(DiscoveryFact {
+            via: DiscoveryVia::UdpSearch,
             state: HostState::Ready,
             host_name: None,
             running_title: None,

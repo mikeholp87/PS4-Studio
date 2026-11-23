@@ -338,7 +338,25 @@ pub async fn connect_profile(
                 }
             }
         }
-        Err(e) => err = Some(e.to_string()),
+        Err(e) => {
+            // Some consoles ignore the UDP search but still run the Remote Play service.
+            match ps4studio_discovery::probe_remote_play(
+                SocketAddr::new(ip, ps4studio_discovery::REMOTE_PLAY_PORT),
+                Duration::from_secs(2),
+            )
+            .await
+            {
+                Ok(_) => {
+                    facts.discovery = Some(ps4studio_core::capability::DiscoveryFact {
+                        via: ps4studio_core::capability::DiscoveryVia::RemotePlayPort,
+                        state: ps4studio_core::capability::HostState::Ready,
+                        host_name: None,
+                        running_title: None,
+                    });
+                }
+                Err(_) => err = Some(e.to_string()),
+            }
+        }
     }
     {
         let db = lock(&state.db)?;

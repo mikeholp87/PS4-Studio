@@ -38,7 +38,7 @@
         <dt>Model</dt><dd>{models[conn.profile.model]} <small>(selected by you)</small></dd>
         <dt>Connection</dt><dd>{conn.simulated ? `Simulator · ${conn.scenario_id}` : 'Network'}</dd>
         <dt>Address</dt><dd>{conn.profile.address ?? '—'}</dd>
-        <dt>Status</dt><dd>{online ? 'Answered discovery' : 'No answer yet'}</dd>
+        <dt>Status</dt><dd>{online ? 'Console responded' : 'No answer yet'}</dd>
         <dt>Firmware</dt><dd>{conn.profile.firmware.value ?? 'Unknown'} <small>{fwSrc[conn.profile.firmware.source]}</small></dd>
         <dt>Homebrew</dt><dd>{hb === 'available' ? 'File service verified' : 'Not verified'}</dd>
       </dl>
