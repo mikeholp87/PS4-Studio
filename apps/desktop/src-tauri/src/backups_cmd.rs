@@ -1,7 +1,7 @@
 //! Backup commands. Backups are local directories with a checksummed manifest (crate `backups`).
 //! Restore is only offered for data PS4 Studio owns (settings, profiles, themes).
 
-use crate::commands::{lock, setting_ok, AppState};
+use crate::commands::{lock, setting_ok, setting_readable, AppState, SETTING_KEYS};
 use ps4studio_backups as bk;
 use ps4studio_core::model::{ConsoleModel, Firmware, FirmwareSource};
 use ps4studio_core::{db, paths, themes::ThemeStore};
@@ -18,15 +18,6 @@ fn root() -> Result<PathBuf, String> {
         .join("backups"))
 }
 
-const SETTING_KEYS: [&str; 6] = [
-    "theme",
-    "accent",
-    "chiaki_nickname",
-    "ftp_port",
-    "trusted_publishers",
-    "first_run_done",
-];
-
 #[tauri::command]
 pub fn backup_create(state: State<AppState>, label: String) -> Result<bk::Manifest, String> {
     let label = if label.trim().is_empty() {
@@ -39,7 +30,14 @@ pub fn backup_create(state: State<AppState>, label: String) -> Result<bk::Manife
     let mut settings = serde_json::Map::new();
     for k in SETTING_KEYS {
         if let Some(v) = d.get_setting(k).map_err(err)? {
-            settings.insert(k.into(), v.into());
+            settings.insert((*k).into(), v.into());
+        }
+    }
+    // Per-console notes live under console_notes:* — include any that are still readable.
+    for p in d.list_profiles().map_err(err)? {
+        let k = format!("console_notes:profile.{}", p.id);
+        if let Some(v) = d.get_setting(&k).map_err(err)? {
+            settings.insert(k, v.into());
         }
     }
     items.push(bk::NewItem {
@@ -130,7 +128,7 @@ pub fn backup_restore_item(
                 serde_json::from_slice(&data).map_err(|_| "Settings file is not valid.")?;
             let mut n = 0;
             for (k, v) in map {
-                if SETTING_KEYS.contains(&k.as_str()) && setting_ok(&k, &v) {
+                if setting_readable(&k) && setting_ok(&k, &v) {
                     d.set_setting(&k, &v).map_err(err)?;
                     n += 1;
                 }

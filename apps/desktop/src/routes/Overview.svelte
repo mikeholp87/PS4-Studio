@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { app } from '../lib/app.svelte'
   import { api } from '../lib/api'
   import Card from '../lib/components/Card.svelte'
@@ -15,8 +14,23 @@
   const unavailable = ['CPU temperature', 'Fan status', 'Storage capacity', 'Memory use']
   let notes = $state('')
   let saved = $state('')
-  onMount(async () => { notes = saved = (await app.run(() => api.getSetting('console_notes'))) ?? '' })
-  async function saveNotes() { if ((await app.run(() => api.setSetting('console_notes', notes))) !== undefined) saved = notes }
+  const notesKey = $derived(
+    !conn ? null
+      : conn.simulated ? `console_notes:sim.${conn.scenario_id ?? 'unknown'}`
+      : `console_notes:profile.${conn.profile.id}`,
+  )
+  async function loadNotes(key: string) {
+    notes = saved = (await app.run(() => api.getSetting(key))) ?? ''
+  }
+  $effect(() => {
+    const key = notesKey
+    if (key) void loadNotes(key)
+    else { notes = ''; saved = '' }
+  })
+  async function saveNotes() {
+    if (!notesKey) return
+    if ((await app.run(() => api.setSetting(notesKey, notes))) !== undefined) saved = notes
+  }
 </script>
 
 {#if !conn}
@@ -50,7 +64,7 @@
         <button class="danger" onclick={() => app.disconnect()}>Disconnect</button>
         <Gated primary reason={app.blocked('console.remote_play')} onclick={() => app.go('remote')}>Start Remote Play</Gated>
         <button onclick={() => app.go('studio')}>Open Dashboard Studio</button>
-        <button onclick={() => app.go('files')}>Browse Files</button>
+        <Gated reason={app.blocked('homebrew.ftp_read')} onclick={() => app.go('files')}>Browse Files</Gated>
         <button onclick={() => app.go('backups')}>Create Backup</button>
         <button onclick={() => app.go('diagnostics')}>Open Diagnostics</button>
       </div>
@@ -64,11 +78,11 @@
     </Card>
 
     <Card title="Your notes">
-      <label>Anything you want to remember about this console (stored on this computer only)
+      <label>Anything you want to remember about this console (stored on this computer only, per console)
         <textarea bind:value={notes} maxlength="1000" rows="4" placeholder="e.g. firmware shown in Settings → System → System Information"></textarea>
       </label>
-      <button onclick={saveNotes} disabled={notes === saved}>Save notes</button>
-      <p class="note">Because a stock PS4 shares no measurements over the network, this is where you can record values yourself.</p>
+      <button onclick={saveNotes} disabled={!notesKey || notes === saved}>Save notes</button>
+      <p class="note">Because a stock PS4 shares no measurements over the network, this is where you can record values yourself. Notes are scoped to the selected console or simulator scenario.</p>
     </Card>
 
     <Card title="Capabilities">

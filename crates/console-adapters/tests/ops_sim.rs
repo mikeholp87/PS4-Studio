@@ -87,6 +87,47 @@ async fn upload_plan_apply_verify_and_overwrite_backup() {
 }
 
 #[tokio::test]
+async fn apply_reinspects_overwrite_when_file_appears_after_plan() {
+    // PLAN saw no file (overwrites=false); APPLY must still rename-swap if one appeared.
+    let tmp = tempfile::tempdir().unwrap();
+    let local = tmp.path().join("new.txt");
+    std::fs::write(&local, b"fresh").unwrap();
+    let (mut c, fs) = client("transfer_ok").await;
+    let policy = Policy::default();
+    let remote = "/data/homebrew/race.txt";
+    let p = plan(
+        &mut c,
+        &policy,
+        RemoteOp::Upload {
+            local: local.display().to_string(),
+            remote: remote.into(),
+        },
+    )
+    .await
+    .unwrap();
+    assert!(!p.overwrites && p.backup_remote.is_none());
+    fs.files
+        .lock()
+        .unwrap()
+        .insert(remote.into(), b"stale".to_vec());
+    let out = apply(&mut c, &policy, &p, &ctx(&tmp.path().join("bk")))
+        .await
+        .unwrap();
+    assert!(out.verified);
+    assert!(
+        out.backup.is_some(),
+        "live file at APPLY must be backed up even if plan said new"
+    );
+    assert_eq!(fs.files.lock().unwrap()[remote], b"fresh");
+    assert!(!fs
+        .files
+        .lock()
+        .unwrap()
+        .keys()
+        .any(|k| k.ends_with(".ps4studio-bak") || k.ends_with(".ps4studio-part")));
+}
+
+#[tokio::test]
 async fn policy_blocks_protected_and_traversal_before_any_network_write() {
     let tmp = tempfile::tempdir().unwrap();
     let local = tmp.path().join("x");

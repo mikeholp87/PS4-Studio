@@ -28,6 +28,7 @@
   let scale = $state(0.5)
   let progress = $state(0)
   let timers: ReturnType<typeof setInterval>[] = []
+  let timeouts: ReturnType<typeof setTimeout>[] = []
 
   function saveSettings() { try { localStorage.setItem('ps4studio.sim.settings', JSON.stringify(settings)) } catch { /* ignore */ } }
 
@@ -78,7 +79,10 @@
     else if (it.kind === 'toggle' && it.key) {
       if (it.key === 'wifi' || it.key === 'dhcp') net[it.key] = !net[it.key]
       else { settings[it.key] = !settings[it.key]; saveSettings() }
-    } else if (it.key === 'test') { net.last = 'Testing…'; setTimeout(() => (net.last = 'Simulated result: reachable (not a real test)'), 700) }
+    } else if (it.key === 'test') {
+      net.last = 'Testing…'
+      timeouts.push(setTimeout(() => (net.last = 'Simulated result: reachable (not a real test)'), 700))
+    }
     else if (it.kind === 'theme') { active = it.key ? (themes.find((t) => t.id === it.key) ?? null) : null; toast = `Theme: ${it.label}` }
     else if (it.kind === 'file') toast = 'Demo file: nothing to open in a simulation.'
   }
@@ -115,7 +119,11 @@
     const rows = (await app.run(api.listThemes)) ?? []
     themes = rows.flatMap((r) => { const p = parseThemeText(r.json); return p.ok ? [p.theme] : [] })
   })
-  onDestroy(() => { ro?.disconnect(); clearInterval(clock); timers.forEach(clearInterval); if (raf) cancelAnimationFrame(raf) })
+  onDestroy(() => {
+    ro?.disconnect(); clearInterval(clock)
+    timers.forEach(clearInterval); timeouts.forEach(clearTimeout)
+    if (raf) cancelAnimationFrame(raf)
+  })
 </script>
 
 <div class="top">

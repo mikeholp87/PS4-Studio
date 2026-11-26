@@ -209,8 +209,42 @@ pub fn delete_profile(state: State<AppState>, id: i64) -> Result<bool, String> {
     Ok(removed)
 }
 
+/// Flat settings the webview may read/write. Keep in sync with `setting_ok` / backups.
+pub(crate) const SETTING_KEYS: &[&str] = &[
+    "theme",
+    "accent",
+    "first_run_done",
+    "chiaki_nickname",
+    "ftp_port",
+    "companion_port",
+    "trusted_publishers",
+    "console_notes", // legacy global; prefer console_notes:profile.* / console_notes:sim.*
+];
+
+fn notes_key(key: &str) -> bool {
+    key.strip_prefix("console_notes:").is_some_and(|rest| {
+        !rest.is_empty()
+            && rest.len() <= 64
+            && rest
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+    })
+}
+
+/// True when the key is allowlisted for get/set (including per-console notes keys).
+pub(crate) fn setting_readable(key: &str) -> bool {
+    SETTING_KEYS.contains(&key) || notes_key(key)
+}
+
+fn notes_value_ok(value: &str) -> bool {
+    value.chars().count() <= 1000 && value.chars().all(|c| !c.is_control() || c == '\n')
+}
+
 /// Only these keys can be read/written from the webview, each with a validator.
 pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
+    if notes_key(key) {
+        return notes_value_ok(value);
+    }
     match key {
         "theme" => matches!(value, "dark" | "light" | "system"),
         "accent" => {
@@ -219,9 +253,7 @@ pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
                 && value[1..].chars().all(|c| c.is_ascii_hexdigit())
         }
         "first_run_done" => matches!(value, "0" | "1"),
-        "console_notes" => {
-            value.chars().count() <= 1000 && value.chars().all(|c| !c.is_control() || c == '\n')
-        }
+        "console_notes" => notes_value_ok(value),
         "ftp_port" | "companion_port" => value.parse::<u16>().is_ok_and(|p| p > 0),
         "trusted_publishers" => {
             value.len() <= 400
@@ -242,10 +274,7 @@ pub(crate) fn setting_ok(key: &str, value: &str) -> bool {
 
 #[tauri::command]
 pub fn get_setting(state: State<AppState>, key: String) -> Result<Option<String>, String> {
-    if !matches!(
-        key.as_str(),
-        "theme" | "accent" | "first_run_done" | "chiaki_nickname"
-    ) {
+    if !setting_readable(&key) {
         return Err("Unknown setting.".into());
     }
     lock(&state.db)?
@@ -634,5 +663,11 @@ mod tests {
         assert!(setting_ok("console_notes", "Firmware 9.00\nFan is loud"));
         assert!(!setting_ok("console_notes", "bell\u{7}"));
         assert!(!setting_ok("console_notes", &"x".repeat(1001)));
+        assert!(super::setting_readable("trusted_publishers"));
+        assert!(super::setting_readable("console_notes:profile.3"));
+        assert!(super::setting_readable("console_notes:sim.stock"));
+        assert!(!super::setting_readable("console_notes:../etc"));
+        assert!(setting_ok("console_notes:profile.1", "ok"));
+        assert!(!setting_ok("console_notes:profile.1", "bell\u{7}"));
     }
 }

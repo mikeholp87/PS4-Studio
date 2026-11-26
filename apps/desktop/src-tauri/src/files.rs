@@ -7,7 +7,7 @@ use ps4studio_backups as bk;
 use ps4studio_console_adapters::ftp::{self, Entry, FtpClient};
 use ps4studio_console_adapters::ops::{self, ApplyCtx, Outcome, Plan, RemoteOp};
 use ps4studio_console_adapters::paths::{normalize, Policy};
-use ps4studio_core::capability::FtpFact;
+use ps4studio_core::capability::{evaluate, Capability, CompanionFact, FtpFact, Status};
 use ps4studio_core::paths;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -78,6 +78,10 @@ pub async fn files_connect(
     password: Option<String>,
 ) -> Result<ConnectionView, String> {
     state.files.reset_async().await;
+    // reset_async drops the companion socket — keep session facts honest.
+    if let Some(s) = lock(&state.session)?.as_mut() {
+        s.facts.companion = CompanionFact::NotProbed;
+    }
     let (simulated, scenario, address) = {
         let g = lock(&state.session)?;
         let s = g.as_ref().ok_or("Select a console first.")?;
@@ -164,6 +168,7 @@ pub async fn files_disconnect(state: State<'_, AppState>) -> Result<ConnectionVi
     let s = g.as_mut().ok_or("Select a console first.")?;
     s.facts.ftp = FtpFact::NotProbed;
     s.facts.write_unlocked = false;
+    s.facts.companion = CompanionFact::NotProbed;
     Ok(view(s))
 }
 
@@ -301,6 +306,14 @@ pub async fn files_plan(state: State<'_, AppState>, op: RemoteOp) -> Result<Plan
                 "Writes are locked. Unlock writes for this session to make changes.".into(),
             );
         }
+        if matches!(
+            s.facts.ftp,
+            FtpFact::Connected {
+                writable: Some(false)
+            }
+        ) {
+            return Err("The file service refused a write test.".into());
+        }
     }
     let mut g = state.files.client.lock().await;
     let p = ops::plan(client(&state, &mut g).await?, &Policy::default(), op)
@@ -350,8 +363,17 @@ pub async fn files_apply<R: tauri::Runtime>(
     }
     {
         let g = lock(&state.session)?;
-        if !g.as_ref().is_some_and(|s| s.facts.write_unlocked) {
+        let s = g.as_ref().ok_or("Select a console first.")?;
+        if !s.facts.write_unlocked {
             return Err("Writes are locked.".into());
+        }
+        if matches!(
+            s.facts.ftp,
+            FtpFact::Connected {
+                writable: Some(false)
+            }
+        ) {
+            return Err("The file service refused a write test.".into());
         }
     }
     state.files.cancel.store(false, Ordering::Relaxed);
@@ -431,7 +453,10 @@ pub async fn files_apply<R: tauri::Runtime>(
             }
             if let Some(s) = lock(&state.session)?.as_mut() {
                 if let FtpFact::Connected { writable } = &mut s.facts.ftp {
-                    *writable = Some(true);
+                    // First successful write verifies capability; never flip a prior refusal.
+                    if writable.is_none() {
+                        *writable = Some(true);
+                    }
                 }
             }
             let detail = format!(
@@ -546,7 +571,6 @@ pub async fn files_download<R: tauri::Runtime>(
 // ---------------------------------------------------------------------------------------------
 
 use ps4studio_console_adapters::companion::{Client as CompanionClient, CompanionError};
-use ps4studio_core::capability::{evaluate, Capability, CompanionFact, Status};
 
 #[tauri::command]
 pub async fn companion_connect(

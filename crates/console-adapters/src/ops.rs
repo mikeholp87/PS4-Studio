@@ -195,15 +195,19 @@ pub struct ApplyCtx<'a> {
     pub cancel: &'a AtomicBool,
 }
 
-async fn backup_remote(c: &mut FtpClient, remote: &str, dir: &Path) -> Result<PathBuf, OpError> {
+async fn backup_remote(
+    c: &mut FtpClient,
+    remote: &str,
+    dir: &Path,
+    cancel: &AtomicBool,
+) -> Result<PathBuf, OpError> {
     let rel = normalize(remote)?;
     let dest = dir.join(rel.trim_start_matches('/'));
     if let Some(p) = dest.parent() {
         std::fs::create_dir_all(p)?;
     }
     let mut f = tokio::fs::File::create(&dest).await?;
-    c.download(remote, &mut f, &|_| {}, &AtomicBool::new(false))
-        .await?;
+    c.download(remote, &mut f, &|_| {}, cancel).await?;
     Ok(dest)
 }
 
@@ -216,32 +220,62 @@ pub async fn apply(
 ) -> Result<Outcome, OpError> {
     let mut lines = Vec::new();
     let mut backup = None;
-    if let Some(r) = &plan.backup_remote {
-        policy.check_write(r)?;
-        let b = backup_remote(c, r, ctx.backup_dir).await?;
-        lines.push(format!(
-            "Saved a copy of the existing file to {}",
-            b.display()
-        ));
-        backup = Some(b);
+    // Non-upload ops still honour plan.backup_remote (delete). Uploads re-inspect below.
+    if !matches!(plan.op, RemoteOp::Upload { .. }) {
+        if let Some(r) = &plan.backup_remote {
+            policy.check_write(r)?;
+            let b = backup_remote(c, r, ctx.backup_dir, ctx.cancel).await?;
+            lines.push(format!(
+                "Saved a copy of the existing file to {}",
+                b.display()
+            ));
+            backup = Some(b);
+        }
     }
     let verified = match &plan.op {
         RemoteOp::Upload { local, remote } => {
             let remote = policy.check_write(remote)?;
+            // Re-inspect at APPLY: plan.overwrites can be stale (TOCTOU).
+            let live = exists(c, &remote).await?;
+            if live {
+                match c.size(&remote).await? {
+                    Some(sz) if sz <= MAX_BACKUP_BYTES => {
+                        let b = backup_remote(c, &remote, ctx.backup_dir, ctx.cancel).await?;
+                        lines.push(format!(
+                            "Saved a copy of the existing file to {}",
+                            b.display()
+                        ));
+                        backup = Some(b);
+                    }
+                    Some(sz) => lines.push(format!(
+                        "Warning: existing file is {sz} bytes (over backup limit); replacing without a local backup."
+                    )),
+                    None => {}
+                }
+            } else if plan.backup_remote.is_some() || plan.overwrites {
+                lines.push(
+                    "Existing file was gone before apply; continuing as a new upload.".into(),
+                );
+            }
             let part = format!("{remote}{PART_SUFFIX}");
             let mut f = tokio::fs::File::open(local).await?;
-            let sent = c.upload(&mut f, &part, ctx.progress, ctx.cancel).await?;
-            if plan.overwrites {
-                // Rename-swap: keep the old file until the new name is in place. DELE-then-RNTO
-                // would leave nothing if rename failed after delete.
+            let sent = match c.upload(&mut f, &part, ctx.progress, ctx.cancel).await {
+                Ok(n) => n,
+                Err(e) => {
+                    let _ = c.dele(&part).await;
+                    return Err(e.into());
+                }
+            };
+            if live {
+                // Rename-swap: keep the old file until the new name is in place.
                 let bak = format!("{remote}{BAK_SUFFIX}");
                 if exists(c, &bak).await? {
                     c.dele(&bak).await?;
                 }
                 c.rename(&remote, &bak).await?;
                 if let Err(e) = c.rename(&part, &remote).await {
-                    // Best-effort restore so a failed final rename does not leave only `.bak`.
                     let _ = c.rename(&bak, &remote).await;
+                    let _ = c.dele(&part).await;
                     return Err(e.into());
                 }
                 match c.dele(&bak).await {
@@ -250,8 +284,9 @@ pub async fn apply(
                         "Warning: could not remove temporary backup {bak}: {e}"
                     )),
                 }
-            } else {
-                c.rename(&part, &remote).await?;
+            } else if let Err(e) = c.rename(&part, &remote).await {
+                let _ = c.dele(&part).await;
+                return Err(e.into());
             }
             lines.push(format!("Uploaded {sent} bytes to {remote}"));
             c.size(&remote).await? == Some(sent)

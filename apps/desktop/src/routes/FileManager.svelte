@@ -25,6 +25,7 @@
   let queue = $state<{ id: number; label: string; state: 'running' | 'done' | 'failed'; detail: string }[]>([])
   let qid = 0
   let remoteReq = 0
+  let localReq = 0
 
   const conn = $derived(app.connection)
   const ftp = $derived(conn?.capabilities.find((c) => c.capability === 'homebrew.ftp_read'))
@@ -37,7 +38,9 @@
   const size = (n: number) => (n > 1 << 20 ? `${(n / (1 << 20)).toFixed(1)} MB` : n > 1024 ? `${(n / 1024).toFixed(1)} kB` : `${n} B`)
 
   async function loadLocal(p: string | null) {
+    const req = ++localReq
     const l = await app.run(() => api.filesListLocal(p))
+    if (req !== localReq) return
     if (l) { localPath = l.path; localParent = l.parent; local = l.entries; selLocal = null }
   }
   async function loadRemote(p: string) {

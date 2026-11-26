@@ -3,14 +3,17 @@
   import { app } from '../lib/app.svelte'
   import { api, type ConsoleProfile, type ConsoleModel, type Scenario, type Discovered } from '../lib/api'
   import Card from '../lib/components/Card.svelte'
+  import Modal from '../lib/components/Modal.svelte'
 
   let profiles = $state<ConsoleProfile[]>([])
   let scenarios = $state<Scenario[]>([])
   let found = $state<Discovered[] | null>(null)
   let searching = $state(false)
   let busy = $state<number | null>(null)
+  let simBusy = $state(false)
   let pick = $state('stock')
   let form = $state({ name: '', model: 'slim' as ConsoleModel, address: '', firmware: '' })
+  let confirmRemove = $state<number | null>(null)
 
   async function load() {
     profiles = (await app.run(api.listProfiles)) ?? []
@@ -22,23 +25,37 @@
     const p = await app.run(() => api.addProfile({ ...form, firmware: form.firmware || null }))
     if (p) { form = { name: '', model: 'slim', address: '', firmware: '' }; await load() }
   }
-  async function remove(id: number) { if (await app.run(() => api.deleteProfile(id))) await load() }
+  async function remove(id: number) {
+    confirmRemove = null
+    if (await app.run(() => api.deleteProfile(id))) await load()
+  }
   async function search() {
+    if (searching || busy !== null || simBusy) return
     searching = true
-    found = (await app.run(api.discoverLan)) ?? null
-    searching = false
+    try { found = (await app.run(api.discoverLan)) ?? null }
+    finally { searching = false }
   }
   function use(d: Discovered) {
     form = { ...form, name: d.name ?? 'My PS4', address: d.address, firmware: d.firmware_hint ?? '' }
   }
   async function connect(id: number) {
+    if (busy !== null || simBusy || searching) return
     busy = id
-    const c = await app.run(() => api.connectProfile(id))
-    busy = null
-    if (c) { app.connection = c; await load(); app.go(c.capabilities.some((x) => x.capability === 'console.basic_status' && x.status === 'available') ? 'overview' : 'diagnostics') }
+    try {
+      const c = await app.run(() => api.connectProfile(id))
+      if (c) { app.connection = c; await load(); app.go(c.capabilities.some((x) => x.capability === 'console.basic_status' && x.status === 'available') ? 'overview' : 'diagnostics') }
+    } finally { busy = null }
   }
-  async function sim() { const c = await app.run(() => api.connectSimulator(pick)); if (c) { app.connection = c; app.go('overview') } }
+  async function sim() {
+    if (busy !== null || simBusy || searching) return
+    simBusy = true
+    try {
+      const c = await app.run(() => api.connectSimulator(pick))
+      if (c) { app.connection = c; app.go('overview') }
+    } finally { simBusy = false }
+  }
   const desc = $derived(scenarios.find((s) => s.id === pick)?.description ?? '')
+  const locked = $derived(busy !== null || simBusy || searching)
 </script>
 
 <div class="cols">
@@ -48,15 +65,15 @@
       <select bind:value={pick}>{#each scenarios as s}<option value={s.id}>{s.label}</option>{/each}</select>
     </label>
     <p class="hint">{desc}</p>
-    <button class="primary" onclick={sim}>Connect to simulator</button>
+    <button class="primary" onclick={sim} disabled={locked}>{simBusy ? 'Connecting…' : 'Connect to simulator'}</button>
   </Card>
 
   <Card title="Find consoles on this network">
-    <p class="hint">Sends one discovery broadcast (UDP 987) on your local network and lists consoles that answer. Nothing else is probed. A console in Rest Mode may answer as standby.</p>
-    <button onclick={search} disabled={searching}>{searching ? 'Searching…' : 'Search local network'}</button>
+    <p class="hint">Sends one discovery broadcast (UDP 987) on your local network and lists consoles that answer. Nothing else is probed. A console in Rest Mode may answer as standby. Some consoles ignore this search even when Remote Play works — use Connect on a saved IP (or Add by IP) in that case.</p>
+    <button onclick={search} disabled={locked}>{searching ? 'Searching…' : 'Search local network'}</button>
     {#if found}
       {#if found.length === 0}
-        <p class="hint">No console answered. Confirm that the Debian computer and PS4 are on the same local network, then try again or add the console by IP address.</p>
+        <p class="hint">No console answered UDP search. Add by IP and press Connect (the app also checks the Remote Play service on TCP 9295), or confirm both devices are on the same local network.</p>
       {:else}
         <table>
           <thead><tr><th>Name</th><th>Address</th><th>State</th><th></th></tr></thead>
@@ -93,8 +110,8 @@
             <tr>
               <td>{p.name}</td><td>{p.model}</td><td>{p.address}</td><td>{p.firmware.value ?? '—'}</td>
               <td class="end">
-                <button class="primary" disabled={busy === p.id} onclick={() => connect(p.id)}>{busy === p.id ? 'Testing…' : 'Connect'}</button>
-                <button class="danger" onclick={() => remove(p.id)}>Remove</button>
+                <button class="primary" disabled={locked} onclick={() => connect(p.id)}>{busy === p.id ? 'Testing…' : 'Connect'}</button>
+                <button class="danger" disabled={locked} onclick={() => (confirmRemove = p.id)}>Remove</button>
               </td>
             </tr>
           {/each}
@@ -103,6 +120,17 @@
     {/if}
   </Card>
 </div>
+
+{#if confirmRemove !== null}
+  {@const victim = profiles.find((p) => p.id === confirmRemove)}
+  <Modal title="Remove saved console?" onclose={() => (confirmRemove = null)}>
+    <p>Remove “{victim?.name ?? confirmRemove}”? This only deletes the saved entry on this computer. Nothing on the PS4 changes.</p>
+    {#snippet footer()}
+      <button onclick={() => (confirmRemove = null)}>Cancel</button>
+      <button class="danger" onclick={() => confirmRemove !== null && remove(confirmRemove)}>Remove</button>
+    {/snippet}
+  </Modal>
+{/if}
 
 <style>
   .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--space-4); align-items: start; }

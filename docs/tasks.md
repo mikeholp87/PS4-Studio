@@ -1,7 +1,7 @@
 # Tasks
 
 ## Phases
-- [ ] P0 Bootstrap (in progress)
+- [x] P0 Bootstrap
 - [x] P1 Research docs (4 docs written; open items listed in research.md)
 - [x] P2 Desktop foundation
 - [x] P3 Connection system
@@ -103,6 +103,12 @@
 - Also added the `custom-protocol` cargo feature (standard Tauri requirement for release embedding). It was NOT the cause of the blank window (a port-1420 listener saw zero requests from the old binary) but is required practice.
 - Verified: release binary rendered in an isolated Xvfb display (welcome dialog, sidebar, working IPC). Gates re-run.
 - Lesson: previous "launched OK" checks only proved the process stayed alive; always look at the rendered window of the packaged build.
+
+### FIX: audit follow-up (settings allowlist, companion sync, TOCTOU, UI) — done 2026-11-26
+- Fixed: `get_setting` now shares allowlist with `set_setting` (incl. notes/ports/publishers); per-console notes keys `console_notes:profile.*` / `console_notes:sim.*`; FTP reset clears companion facts; apply re-inspects overwrite at APPLY + cancelable backup download + part cleanup; plan/apply refuse when writable already false; first success only sets writable if previously None; File Manager local list race guard; Connections busy lock + remove confirm + UDP-search copy; ConsoleSim timeout tracking; Overview Browse Files gated.
+- Files: `commands.rs`, `backups_cmd.rs`, `files.rs`, `ops.rs` (+ test), Connections/Overview/FileManager/ConsoleSim routes, docs.
+- Tests: cargo test --workspace 87 pass; vitest 31+3; clippy/eslint/svelte-check clean.
+- Next: real PS4 Connect/chiaki; CI on GitHub; remaining hardening from audit backlog.
 
 ### AUDIT: full codebase bug pass — done 2026-11-26
 - Trigger: full audit (gates + Rust/UI review). Gates were already green; audit found lifecycle and data-safety bugs tests did not cover.
