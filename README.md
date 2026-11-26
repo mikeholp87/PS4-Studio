@@ -2,6 +2,8 @@
 
 An open-source Debian desktop app for managing a PlayStation 4 over your local network and designing console-style dashboards. Built with Rust, Tauri 2 and Svelte 5.
 
+**Project page:** [mikeholp87.github.io/PS4-Studio](https://mikeholp87.github.io/PS4-Studio/)
+
 > **Independent project.** PS4 Studio is not affiliated with, endorsed by, or sponsored by Sony Interactive Entertainment. "PlayStation" and "PS4" are trademarks of their owners and are used only to describe compatibility. The app ships its own original icon and design; it contains no Sony assets.
 
 > **Honest status (v0.1.0).** Everything has been developed and tested against a built-in **simulator** and automated tests. **No physical PS4 has been used.** Features that need a console are marked below as *simulator-verified*. The PS4-side companion app is an **untested source skeleton**.

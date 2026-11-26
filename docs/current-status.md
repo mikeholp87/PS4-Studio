@@ -1,5 +1,7 @@
 # Current status
 
+Project page: https://mikeholp87.github.io/PS4-Studio/ (`site/` + Pages workflow).
+
 Audit follow-up (2026-11-26): settings get/set allowlist unified; per-console notes; companion facts cleared when FTP reset drops the socket; APPLY re-inspects overwrite TOCTOU; Connections/File Manager race guards. See tasks.md FIX entry.
 
 All phases P0–P8 are implemented to the level the dev environment allows. **Release prep complete; not yet published, and nothing has been validated on real hardware.**

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mikeholp87.github.io/PS4-Studio/sitemap.xml

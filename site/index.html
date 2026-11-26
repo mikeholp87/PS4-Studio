@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#edeff5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+  <title>PS4 Studio: manage a PlayStation 4 over LAN from Debian</title>
+  <meta name="description" content="Free, open source Debian desktop app for PS4 discovery, Remote Play via chiaki-ng, Dashboard Studio themes, and capability-gated homebrew file tools. Simulator-verified. Independent project, not affiliated with Sony.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://mikeholp87.github.io/PS4-Studio/">
+  <link rel="icon" href="./ps4-studio.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PS4 Studio">
+  <meta property="og:title" content="PS4 Studio: manage a PlayStation 4 over LAN from Debian">
+  <meta property="og:description" content="Discovery, Remote Play launch, Dashboard Studio, and guarded homebrew file tools. Built with Rust, Tauri 2 and Svelte 5. Simulator-verified.">
+  <meta property="og:url" content="https://mikeholp87.github.io/PS4-Studio/">
+  <meta property="og:image" content="https://mikeholp87.github.io/PS4-Studio/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image:alt" content="PS4 Studio overview with a simulated console connection and capability list">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PS4 Studio: manage a PlayStation 4 over LAN from Debian">
+  <meta name="twitter:description" content="Open source Debian app for PS4 LAN management and dashboard design. Simulator-verified. Not affiliated with Sony.">
+  <meta name="twitter:image" content="https://mikeholp87.github.io/PS4-Studio/assets/og.jpg">
+  <meta name="twitter:image:alt" content="PS4 Studio overview with a simulated console connection">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PS4 Studio",
+    "description": "A Debian desktop app for managing a PlayStation 4 over a local network and designing console-style dashboards. Built with Rust, Tauri 2 and Svelte 5.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Debian Linux",
+    "softwareVersion": "0.1.0",
+    "url": "https://mikeholp87.github.io/PS4-Studio/",
+    "downloadUrl": "https://github.com/mikeholp87/PS4-Studio/releases",
+    "sameAs": "https://github.com/mikeholp87/PS4-Studio",
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Person", "name": "Mike Holp" }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <div class="wrap">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="PS4 Studio home"><img src="./ps4-studio.svg" alt="" width="36" height="36">PS4 Studio</a>
+      <nav class="nav" aria-label="Main navigation">
+        <a class="hide-small" href="#features">Features</a>
+        <a class="hide-small" href="#screenshots">Screenshots</a>
+        <a href="#install">Install</a>
+        <a class="pill" href="https://github.com/mikeholp87/PS4-Studio">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="content">
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="status">Free and open source Debian app for a PlayStation 4 on your LAN. Version 0.1.0 · simulator-verified.</p>
+        <h1 id="hero-title">Manage a PS4 from Debian, without pretending it is unlocked.</h1>
+        <p class="lead">PS4 Studio discovers a console on your network, launches Remote Play through the chiaki-ng you already installed, designs offline dashboards, and only unlocks homebrew file tools after a real capability check. It is an independent project, not affiliated with Sony.</p>
+        <div class="actions">
+          <a class="button" href="#install">Install on Debian</a>
+          <a class="button secondary" href="https://github.com/mikeholp87/PS4-Studio">View on GitHub</a>
+        </div>
+        <ul class="badges" aria-label="Project highlights">
+          <li>Rust, Tauri 2, Svelte 5</li>
+          <li>No telemetry or account</li>
+          <li>GPL-3.0-or-later</li>
+          <li>Runs as a normal user</li>
+        </ul>
+
+        <p class="demo-note">Interactive demo with sample data. It cannot see your network or any console, and nothing leaves this page.</p>
+        <div class="demo" id="demo" aria-label="PS4 Studio simulator demo">
+          <aside class="demo-side" aria-label="Demo sections">
+            <strong>PS4 Studio</strong>
+            <button type="button" data-pane="overview" aria-current="true">Overview</button>
+            <button type="button" data-pane="studio">Dashboard Studio</button>
+            <button type="button" data-pane="files">File Manager</button>
+            <button type="button" data-pane="remote">Remote Control</button>
+          </aside>
+          <div class="demo-main" id="demo-pane" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section" id="about" aria-labelledby="about-title">
+        <div class="section-head">
+          <h2 id="about-title">What is PS4 Studio?</h2>
+          <p>PS4 Studio is a free, open source desktop app for Debian that talks to a PlayStation 4 on your local network. On a stock console it can search the LAN, show honest capability status, and start Remote Play by launching your installed <a href="https://github.com/chiaki-ng/chiaki-ng">chiaki-ng</a> as a separate process. Offline, Dashboard Studio designs and exports original console-style themes with a 1080p TV preview. File Manager, Homebrew and companion theme transfer only appear after verified probes against a console that already runs a homebrew environment — never from an open port alone, and never by installing exploits. Features that need hardware have been developed against a built-in simulator and automated tests; physical-console validation is still incomplete. Version 0.1.0.</p>
+        </div>
+        <p class="note">Version 0.1.0 · Released November 2026 · Screenshots and the demo use simulator fixtures, not a live PS4.</p>
+      </section>
+
+      <section class="section" id="features" aria-labelledby="features-title">
+        <div class="section-head">
+          <h2 id="features-title">What it actually does</h2>
+          <p>Capabilities are verified by probes. Unknown stays unavailable, with a reason. Writes stay locked until you unlock them for the session and confirm each change.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="card">
+            <h3>LAN discovery</h3>
+            <p>UDP search on port 987, plus Connect-by-IP with a Remote Play TCP 9295 fallback when a console ignores the UDP search.</p>
+            <span class="tag">Stock PS4</span>
+          </article>
+          <article class="card">
+            <h3>Remote Play launch</h3>
+            <p>Detects chiaki-ng (native or Flatpak) and starts it for you. Registration keys and passcodes never appear on the command line.</p>
+            <span class="tag">Needs chiaki-ng</span>
+          </article>
+          <article class="card">
+            <h3>Dashboard Studio</h3>
+            <p>Original Minimal, Aurora, Grid and Classic templates. Schema-validated JSON themes, 1080p preview, keyboard and gamepad navigation. Offline.</p>
+            <span class="tag">Desktop only</span>
+          </article>
+          <article class="card">
+            <h3>File Manager</h3>
+            <p>Read-only by default. Every write is planned, confirmed, backed up locally first, and audited. Uploads use rename-swap, never delete-before-rename.</p>
+            <span class="tag">Homebrew FTP</span>
+          </article>
+          <article class="card">
+            <h3>Homebrew inventory</h3>
+            <p>Lists local <code>.pkg</code> files, verifies checksums against sidecar manifests, and copies only through the confirmed flow. Never runs or installs packages.</p>
+            <span class="tag">Homebrew FTP</span>
+          </article>
+          <article class="card">
+            <h3>Companion themes</h3>
+            <p>Authenticated (not encrypted) theme transfer to a PS4 Studio companion. The console-side app is still an untested OpenOrbis skeleton.</p>
+            <span class="tag">Experimental</span>
+          </article>
+          <article class="card">
+            <h3>Built-in simulator</h3>
+            <p>Fourteen labelled scenarios with real UDP, FTP and companion servers so you can explore without hardware.</p>
+            <span class="tag">Offline</span>
+          </article>
+          <article class="card">
+            <h3>Diagnostics</h3>
+            <p>Local and capability checks, with a sanitised export that masks IPs, MACs and credential-like lines.</p>
+            <span class="tag">Stock PS4</span>
+          </article>
+          <article class="card">
+            <h3>What it will never do</h3>
+            <p>No firmware flashes, exploits, remote shells, PSN credentials, DRM bypass, or package downloads. Themes do not replace the official PS4 home screen.</p>
+            <span class="tag">By design</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="screenshots" aria-labelledby="screenshots-title">
+        <div class="section-head">
+          <h2 id="screenshots-title">The real interface, on simulator data</h2>
+          <p>These are screenshots of the packaged UI driven by the built-in simulator. They are labelled SIMULATED in the app.</p>
+        </div>
+        <div class="shots-grid">
+          <figure class="shot">
+            <a href="./assets/overview.png"><img src="./assets/overview.webp" width="1280" height="800" loading="lazy" alt="PS4 Studio overview showing a simulated console, notes and capability list"></a>
+            <figcaption>Overview with a simulated console and verified capabilities.</figcaption>
+          </figure>
+          <figure class="shot">
+            <a href="./assets/studio-aurora.png"><img src="./assets/studio-aurora.webp" width="1280" height="800" loading="lazy" alt="Dashboard Studio editing an Aurora theme with a 1080p TV preview"></a>
+            <figcaption>Dashboard Studio with the Aurora template and 1080p preview.</figcaption>
+          </figure>
+          <figure class="shot">
+            <a href="./assets/file-manager.png"><img src="./assets/file-manager.webp" width="1280" height="800" loading="lazy" alt="File Manager dual pane with local and console folders"></a>
+            <figcaption>File Manager, read-only until you unlock writes for the session.</figcaption>
+          </figure>
+          <figure class="shot">
+            <a href="./assets/remote-control.png"><img src="./assets/remote-control.webp" width="1280" height="800" loading="lazy" alt="Remote Control page with chiaki-ng setup guidance"></a>
+            <figcaption>Remote Control launches chiaki-ng; it does not embed Remote Play video.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" id="platforms" aria-labelledby="platforms-title">
+        <div class="section-head">
+          <h2 id="platforms-title">Supported platforms</h2>
+          <p>Honest status of what has been run. Release prep is complete; a clean-machine <code>apt install</code> and broad hardware validation are still open.</p>
+        </div>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Platform status, horizontally scrollable">
+          <table aria-labelledby="platforms-title">
+            <thead><tr><th scope="col">Platform</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Debian (amd64)</th><td><code>.deb</code> builds with Tauri. Developed and launched on KDE Plasma / Wayland. GNOME and X11 are untested. A full clean-VM <code>apt install</code> has not been recorded yet.</td></tr>
+              <tr><th scope="row">Stock PS4</th><td>Discovery and Remote Play paths are implemented. One real console was observed answering Remote Play on TCP 9295 while ignoring UDP search. End-to-end chiaki-ng sessions are not yet documented.</td></tr>
+              <tr><th scope="row">Homebrew PS4 (FTP)</th><td>Simulator-verified only. Path policy follows published GoldHEN notes; not verified against a physical jailbroken console.</td></tr>
+              <tr><th scope="row">PS4 companion app</th><td>Protocol core tested on the host (<code>make host-test</code>). OpenOrbis console binary is an untested skeleton.</td></tr>
+              <tr><th scope="row">Windows / macOS</th><td>Not planned for v0.1.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="install" aria-labelledby="install-title">
+        <div class="build-panel">
+          <div class="section-head">
+            <h2 id="install-title">Install on Debian</h2>
+            <p>Runtime needs WebKitGTK 4.1 and GTK 3 (pulled in by the package). The app runs as your user; no root is required at runtime.</p>
+          </div>
+          <h3>1. Install from a release <code>.deb</code></h3>
+          <pre tabindex="0" role="region" aria-label="Install the Debian package"><code>sudo apt install ./ps4-studio_0.1.0_amd64.deb
+ps4-studio</code></pre>
+          <p>Download the <code>.deb</code> from <a href="https://github.com/mikeholp87/PS4-Studio/releases">GitHub Releases</a> when a release is published. Prefer verifying the published checksum before you install.</p>
+          <h3>2. Or build from source</h3>
+          <pre tabindex="0" role="region" aria-label="Build PS4 Studio from source"><code>pnpm install
+cd apps/desktop/src-tauri
+cargo tauri build --bundles deb</code></pre>
+          <details>
+            <summary>Remote Play prerequisite</summary>
+            <p>Install <a href="https://flathub.org/apps/io.github.streetpea.Chiaki4deck">chiaki-ng</a>, register your console inside it once, then enter that nickname under Remote Control. PS4 Studio never passes <code>--registkey</code> or <code>--passcode</code>.</p>
+          </details>
+          <details>
+            <summary>Try without hardware</summary>
+            <p>Open the app and choose <strong>Connections → Offline simulator</strong>. Dashboard Studio works fully offline. File and companion features need a homebrew-capable scenario.</p>
+          </details>
+          <p class="build-links">
+            <a href="https://github.com/mikeholp87/PS4-Studio/blob/main/docs/installation.md">Installation guide</a>
+            <a href="https://github.com/mikeholp87/PS4-Studio/blob/main/docs/troubleshooting.md">Troubleshooting</a>
+            <a href="https://github.com/mikeholp87/PS4-Studio/blob/main/docs/security.md">Security model</a>
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="safety" aria-labelledby="safety-title">
+        <div class="section-head">
+          <h2 id="safety-title">Safe by design</h2>
+          <p>Read-only by default. Network timeouts everywhere. No secrets in logs. Simulator output is always labelled.</p>
+        </div>
+        <div class="safety-grid">
+          <article class="card">
+            <h3>Capability probes</h3>
+            <p>An open port is never treated as evidence. FTP needs a greeting, login and listing. Companion needs a successful authenticated pair.</p>
+          </article>
+          <article class="card">
+            <h3>Confirmed writes</h3>
+            <p>INSPECT → PLAN → CONFIRM → APPLY → VERIFY, with a local checksummed backup before overwrite or delete, and an audit row for every APPLY.</p>
+          </article>
+          <article class="card">
+            <h3>No telemetry</h3>
+            <p>Nothing phones home. Diagnostics exports are sanitised. FTP and companion links are unencrypted — use them only on a network you trust.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="limits" aria-labelledby="limits-title">
+        <div class="section-head">
+          <h2 id="limits-title">Know the preview’s boundaries</h2>
+          <p>PS4 Studio lists its gaps. Please read them before you rely on it for a console you care about.</p>
+        </div>
+        <div class="limits-grid">
+          <div>
+            <h3>Hardware</h3>
+            <p>Most features are simulator-verified. Real Remote Play sessions, GoldHEN FTP layout and the OpenOrbis companion still need documented hardware runs. Some consoles ignore UDP discovery even when Remote Play answers — use Add by IP and Connect.</p>
+          </div>
+          <div>
+            <h3>Homebrew risk</h3>
+            <p>File tools only work if you already run a homebrew environment. Mistakes can affect saves and packages. Prefer Sony’s own backup tools before experimenting, and keep writes unlocked only while you need them.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section faq" id="faq" aria-labelledby="faq-title">
+        <div class="section-head"><h2 id="faq-title">Questions</h2></div>
+        <details>
+          <summary>Is this an official Sony product?</summary>
+          <p>No. PS4 Studio is an independent open source project. It is not affiliated with, endorsed by, or sponsored by Sony Interactive Entertainment. “PlayStation” and “PS4” are trademarks of their owners and are used only to describe compatibility.</p>
+        </details>
+        <details>
+          <summary>Does Remote Play give file access?</summary>
+          <p>No. Remote Play is video and controller input through chiaki-ng. File Manager needs a separate homebrew FTP service that you already enabled on the console.</p>
+        </details>
+        <details>
+          <summary>Will a theme change my PS4 home screen?</summary>
+          <p>No. Themes are for Dashboard Studio and, later, the PS4 Studio companion app. They do not replace the official PS4 home screen.</p>
+        </details>
+        <details>
+          <summary>Does it send data anywhere?</summary>
+          <p>There is no telemetry and no account. Network traffic is only the LAN discovery, Remote Play launch of chiaki-ng, optional FTP, and optional companion link you start yourself.</p>
+        </details>
+        <details>
+          <summary>Where do I report a bug or security issue?</summary>
+          <p>Open an issue on <a href="https://github.com/mikeholp87/PS4-Studio/issues">GitHub</a>. For security reports, read the <a href="https://github.com/mikeholp87/PS4-Studio/blob/main/SECURITY.md">security policy</a> first.</p>
+        </details>
+      </section>
+
+      <section class="support" id="support" aria-labelledby="support-title">
+        <h2 id="support-title">♥ Support PS4 Studio</h2>
+        <p>PS4 Studio is free and open source. If it saves you time, sponsoring helps me keep fixing bugs, answering issues and shipping updates. Every bit helps, and you can stop any time.</p>
+        <div class="actions">
+          <a class="button" href="https://github.com/sponsors/mikeholp87">Sponsor on GitHub</a>
+          <a class="button secondary" href="https://github.com/mikeholp87/PS4-Studio">Star the repository</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>PS4 Studio by Mike Holp. Licensed GPL-3.0-or-later. Independent project — not affiliated with Sony Interactive Entertainment. PlayStation and PS4 are trademarks of their owners.</p>
+      <nav aria-label="Footer">
+        <a href="https://github.com/mikeholp87/PS4-Studio">GitHub</a>
+        <a href="https://github.com/mikeholp87/PS4-Studio/blob/main/docs/security.md">Security</a>
+        <a href="https://github.com/mikeholp87/PS4-Studio/blob/main/docs/troubleshooting.md">Troubleshooting</a>
+        <a href="https://github.com/mikeholp87/PS4-Studio/issues">Issues</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var panes = {
+        overview: {
+          title: 'Living room PS4',
+          body: 'Simulator scenario “homebrew”. Capabilities come from probes, not guesses.',
+          caps: [
+            ['Console discovery', 'Available', 'ok'],
+            ['Remote Play launch', 'Needs chiaki-ng', 'warn'],
+            ['File service (FTP)', 'Available', 'ok'],
+            ['CPU temperature', 'Unavailable', 'no']
+          ]
+        },
+        studio: {
+          title: 'Dashboard Studio',
+          body: 'Offline theme editor with a 1080p TV preview. Themes are plain JSON — no scripts, no URLs.',
+          caps: [
+            ['Template', 'Aurora', 'ok'],
+            ['Tiles', '8', 'ok'],
+            ['Validation', 'Schema draft-07', 'ok'],
+            ['Send to console', 'Needs companion', 'warn']
+          ]
+        },
+        files: {
+          title: 'File Manager',
+          body: 'Read-only until you unlock writes. Every change shows a plan and needs confirmation.',
+          caps: [
+            ['Connection', 'FTP verified', 'ok'],
+            ['Writes', 'Locked', 'warn'],
+            ['Allowed paths', '/data only', 'ok'],
+            ['Traffic', 'Not encrypted', 'warn']
+          ]
+        },
+        remote: {
+          title: 'Remote Control',
+          body: 'Starts your installed chiaki-ng. PS4 Studio never embeds the Remote Play stream.',
+          caps: [
+            ['chiaki-ng', 'Not detected here', 'warn'],
+            ['Nickname', 'Set in settings', 'ok'],
+            ['Regist key', 'Never on argv', 'ok'],
+            ['Remote wake', 'Unsupported', 'no']
+          ]
+        }
+      };
+
+      var pane = document.getElementById('demo-pane');
+      var buttons = document.querySelectorAll('.demo-side button[data-pane]');
+
+      function render(id) {
+        var data = panes[id];
+        if (!data || !pane) return;
+        var html = '<span class="demo-banner">SIMULATED</span>';
+        html += '<h3>' + data.title + '</h3><p>' + data.body + '</p><ul class="demo-caps">';
+        for (var i = 0; i < data.caps.length; i++) {
+          var c = data.caps[i];
+          html += '<li><span>' + c[0] + '</span><em class="' + c[2] + '">' + c[1] + '</em></li>';
+        }
+        html += '</ul>';
+        pane.innerHTML = html;
+        buttons.forEach(function (btn) {
+          btn.setAttribute('aria-current', btn.getAttribute('data-pane') === id ? 'true' : 'false');
+        });
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          render(btn.getAttribute('data-pane'));
+        });
+      });
+      render('overview');
+    })();
+  </script>
+</body>
+</html>

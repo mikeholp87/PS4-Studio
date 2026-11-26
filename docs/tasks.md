@@ -104,6 +104,12 @@
 - Verified: release binary rendered in an isolated Xvfb display (welcome dialog, sidebar, working IPC). Gates re-run.
 - Lesson: previous "launched OK" checks only proved the process stayed alive; always look at the rendered window of the packaged build.
 
+### SITE: GitHub Pages project page — done 2026-11-26
+- Added `site/` (index, CSS, simulator demo, screenshots/webp, OG, robots, sitemap) in the same house style as Aegis / Restic Studio / Tasky.
+- Workflow `.github/workflows/pages.yml` publishes `site/` on push to `main`.
+- URL: https://mikeholp87.github.io/PS4-Studio/
+- Next: confirm Pages deploy after first push; keep homepage URL on the GitHub repo.
+
 ### FIX: audit follow-up (settings allowlist, companion sync, TOCTOU, UI) — done 2026-11-26
 - Fixed: `get_setting` now shares allowlist with `set_setting` (incl. notes/ports/publishers); per-console notes keys `console_notes:profile.*` / `console_notes:sim.*`; FTP reset clears companion facts; apply re-inspects overwrite at APPLY + cancelable backup download + part cleanup; plan/apply refuse when writable already false; first success only sets writable if previously None; File Manager local list race guard; Connections busy lock + remove confirm + UDP-search copy; ConsoleSim timeout tracking; Overview Browse Files gated.
 - Files: `commands.rs`, `backups_cmd.rs`, `files.rs`, `ops.rs` (+ test), Connections/Overview/FileManager/ConsoleSim routes, docs.
