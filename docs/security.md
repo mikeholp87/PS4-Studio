@@ -10,7 +10,7 @@ PS4 Studio runs as an ordinary user, needs no root, has no background daemon, an
 | FTP data connection | Always to the control peer IP, never to an address the server advertises (no FTP bounce) | `ftp::pasv` | simulator tests |
 | Remote changes | Locked by default → explicit unlock + "FTP is unencrypted" acknowledgement → PLAN (shows changes, warnings, recovery) → confirm → APPLY (plan single-use, re-validated, 5 min expiry) → VERIFY → audit row | `files.rs`, `ops.rs` | `ipc_tests`, `ops_sim` |
 | Remote paths | Lexical normalisation, `..`/NUL/control/backslash rejected; changes only under `/data`; `/system`, `/system_ex`, `/preinst`, `/update`, `/dev`, `/boot` always protected; the allowlist root itself is unchangeable | `paths::Policy` | unit + sim tests |
-| Overwrite/delete | Existing file (≤64 MB) copied into a checksummed local backup first; uploads go to `*.ps4studio-part` then rename | `ops::apply` | `ops_sim` |
+| Overwrite/delete | Existing file (≤64 MB) copied into a checksummed local backup first; uploads go to `*.ps4studio-part`, then rename-swap via `*.ps4studio-bak` (never DELE-before-RNTO) | `ops::apply` | `ops_sim` |
 | Downloads | Never overwrite (suffix), temp file then rename, mode 0644 (no exec bit), never executed | `ops::download_to` | `ops_sim` |
 | Themes / imports | Data only, validated against one JSON Schema in both TS and Rust, ≤256 KB, slug ids, file dialogs opened from Rust (webview never supplies a path) | `core::themes` | shared corpus |
 | Remote Play | Separate chiaki-ng process; argv never contains `--registkey/--morning/--passcode`; stdio discarded; executable only from our own detection; nickname validated | `remote-play` | unit tests |

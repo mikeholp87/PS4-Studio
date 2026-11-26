@@ -39,9 +39,16 @@ class AppState {
     try { this.error = null; return await fn() } catch (e) { this.error = errText(e); return undefined }
   }
 
-  async refresh() { this.connection = (await this.run(api.getConnection)) ?? null }
+  async refresh() {
+    // Keep the last known connection on IPC failure (do not wipe to null).
+    const c = await this.run(api.getConnection)
+    if (c !== undefined) this.connection = c
+  }
 
-  async disconnect() { await this.run(api.disconnect); this.connection = null }
+  async disconnect() {
+    const r = await this.run(api.disconnect)
+    if (r !== undefined) this.connection = null
+  }
 
   applyTheme() {
     const r = document.documentElement

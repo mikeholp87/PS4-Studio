@@ -12,6 +12,13 @@
 - [x] P8 Release engineering (release prep complete; publishing/hardware validation pending)
 
 ## Done log
+### 2026-11-23 — Remove debug build artifacts
+
+- Removed `target/debug` at user request; updated `docs/current-status.md`.
+- Verification: no Cargo/Rust compiler process found; directory absence check passed.
+- Limits: no build or tests run for this artifact cleanup.
+- Next: Cargo will regenerate debug artifacts on the next debug build.
+
 ### 2026-11-22 — Claude Code context recovered into Codex
 
 - Recovered the original 27-section user brief and approved P0–P8 plan into
@@ -96,6 +103,14 @@
 - Also added the `custom-protocol` cargo feature (standard Tauri requirement for release embedding). It was NOT the cause of the blank window (a port-1420 listener saw zero requests from the old binary) but is required practice.
 - Verified: release binary rendered in an isolated Xvfb display (welcome dialog, sidebar, working IPC). Gates re-run.
 - Lesson: previous "launched OK" checks only proved the process stayed alive; always look at the rendered window of the packaged build.
+
+### AUDIT: full codebase bug pass — done 2026-11-26
+- Trigger: full audit (gates + Rust/UI review). Gates were already green; audit found lifecycle and data-safety bugs tests did not cover.
+- Fixed: `connect_profile` now resets FTP/companion state (was leaking prior session); FileState `reset`/`reset_async` split (no tokio `blocking_lock` on the async runtime); overwrite uploads use rename-swap via `.ps4studio-bak` instead of DELE-before-RNTO; apply failure keeps local recovery temp and no longer claims “nothing further was changed”; backup promote failures keep tmp and do not imply rollback; `companion_send_theme` requires `CompanionThemeManagement` Available; Remote Play TCP fallback records `HostState::Unknown` (not Ready); `hb_upload_op` enforces verify-or-ack server-side; UI: connection refresh/disconnect no longer wipe on IPC failure; File Manager listing/download races; `moveFocus` cols≤0 guard; ConsoleSim media timer stacking; gamepad disconnect stops poll.
+- Files: `crates/{core,console-adapters}`, `apps/desktop/src-tauri/src/{commands,files,homebrew}.rs`, `apps/desktop/src/{lib,routes,components}`, `packages/theme-engine`, `simulator/mock-console`, `docs/{security,troubleshooting}.md`.
+- Tests: `cargo test --workspace` 86 pass; clippy -D warnings clean; vitest 31+3; svelte-check/eslint clean; `make host-test` pass. Playwright not re-run this pass.
+- Limits: no real-console retest; remaining medium UI risks (notes are global, Connections multi-click) left as-is.
+- Next: real PS4 connect flow; optional Playwright smoke after UI race fixes.
 
 ### FIX: real PS4 not found by the app — done 2026-11-23 (first real-hardware observation)
 - Symptom: user's powered-on PS4 was not found. A manual scan showed: no UDP 987 reply to broadcast or unicast (several source/versions), no Sony MAC in ARP, BUT one host (AzureWave Wi-Fi MAC) answered ping and had TCP 9295 open; an unauthenticated HTTP request there returned Sony's Remote Play signature (`RP-Version`, `RP-Application-Reason`). So the console was reachable; only the UDP search was ignored.

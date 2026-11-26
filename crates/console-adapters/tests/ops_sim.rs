@@ -76,6 +76,14 @@ async fn upload_plan_apply_verify_and_overwrite_backup() {
         fs.files.lock().unwrap()["/data/homebrew/hello.txt"],
         b"version-two"
     );
+    assert!(
+        !fs.files
+            .lock()
+            .unwrap()
+            .keys()
+            .any(|k| k.ends_with(".ps4studio-bak")),
+        "rename-swap backup name must be removed after a successful overwrite"
+    );
 }
 
 #[tokio::test]

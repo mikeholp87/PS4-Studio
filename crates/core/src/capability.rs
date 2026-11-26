@@ -68,6 +68,8 @@ pub struct CapabilityEntry {
 pub enum HostState {
     Ready,
     Standby,
+    /// Console is present but Ready vs Standby was not observed (e.g. Remote Play TCP only).
+    Unknown,
 }
 
 /// How the console was found. Some consoles ignore the UDP search but still run the Remote Play
@@ -401,6 +403,28 @@ mod tests {
         assert_eq!(st(&f, Capability::ConsoleRemotePlay), Status::Available);
         f.remote_play_binary = None;
         assert_eq!(st(&f, Capability::ConsoleRemotePlay), Status::Unavailable);
+    }
+
+    #[test]
+    fn remote_play_port_discovery_does_not_invent_ready_state() {
+        let mut f = Facts::empty();
+        f.discovery = Some(DiscoveryFact {
+            via: DiscoveryVia::RemotePlayPort,
+            state: HostState::Unknown,
+            host_name: None,
+            running_title: None,
+        });
+        assert_eq!(st(&f, Capability::ConsoleDiscovery), Status::Available);
+        assert_eq!(st(&f, Capability::ConsoleBasicStatus), Status::Available);
+        let ev = evaluate(&f)
+            .into_iter()
+            .find(|c| c.capability == Capability::ConsoleBasicStatus)
+            .and_then(|c| c.evidence)
+            .unwrap();
+        assert!(
+            ev.contains("state unknown"),
+            "evidence must admit Ready/Standby was not observed: {ev}"
+        );
     }
 
     #[test]

@@ -104,7 +104,8 @@ export const api = {
   backupSaveItemAs: (id: string, index: number) => invoke<string | null>('backup_save_item_as', { id, index }),
   hbPickAndScan: () => invoke<PackageInfo[] | null>('hb_pick_and_scan'),
   hbVerify: (name: string) => invoke<HashResult>('hb_verify', { name }),
-  hbUploadOp: (name: string) => invoke<RemoteOp>('hb_upload_op', { name }),
+  hbUploadOp: (name: string, acknowledgeUnverified = false) =>
+    invoke<RemoteOp>('hb_upload_op', { name, acknowledgeUnverified }),
   companionConnect: (code: string) => invoke<ConnectionView>('companion_connect', { code }),
   companionSendTheme: (id: string) => invoke<void>('companion_send_theme', { id }),
   companionDisconnect: () => invoke<ConnectionView>('companion_disconnect'),

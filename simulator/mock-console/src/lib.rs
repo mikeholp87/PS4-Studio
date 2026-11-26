@@ -295,6 +295,8 @@ pub async fn serve_discovery(
             let status = match d.state {
                 ps4studio_core::capability::HostState::Ready => "200 Ok",
                 ps4studio_core::capability::HostState::Standby => "620 Server Standby",
+                // Unknown is session-only (Remote Play TCP path); simulator UDP always has a real state.
+                ps4studio_core::capability::HostState::Unknown => "200 Ok",
             };
             let msg = format!(
                 "HTTP/1.1 {status}\nhost-name:{}\nhost-type:PS4\ndevice-discovery-protocol-version:00020020\n\n",

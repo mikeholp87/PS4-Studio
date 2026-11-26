@@ -69,7 +69,11 @@
     const it = items[idx]
     if (!it) return
     if (it.kind === 'game') overlay = `Launching “${it.label}”…`
-    else if (it.kind === 'media') { overlay = `Now playing “${it.label}”`; progress = 0; timers.push(setInterval(() => (progress = (progress + 4) % 100), 400)) }
+    else if (it.kind === 'media') {
+      timers.forEach(clearInterval); timers = []
+      overlay = `Now playing “${it.label}”`; progress = 0
+      timers.push(setInterval(() => (progress = (progress + 4) % 100), 400))
+    }
     else if (it.kind === 'dir') path = it.label === '..' ? path.replace(/\/[^/]+$/, '') || '/' : (path === '/' ? '' : path) + '/' + it.label
     else if (it.kind === 'toggle' && it.key) {
       if (it.key === 'wifi' || it.key === 'dhcp') net[it.key] = !net[it.key]

@@ -34,8 +34,7 @@ pub struct FileState {
 }
 
 impl FileState {
-    /// Drops the connection, simulator servers and any pending plans (called on disconnect/switch).
-    pub fn reset(&self) {
+    fn clear_meta(&self) {
         for h in self
             .sim_servers
             .lock()
@@ -50,12 +49,21 @@ impl FileState {
         if let Ok(mut p) = self.plans.lock() {
             p.clear();
         }
-        if let Ok(mut c) = self.client.try_lock() {
-            *c = None;
-        }
-        if let Ok(mut c) = self.companion.try_lock() {
-            *c = None;
-        }
+        self.cancel.store(true, Ordering::Relaxed);
+    }
+
+    /// Sync commands (blocking pool): wait for and drop FTP/companion clients.
+    pub fn reset(&self) {
+        self.clear_meta();
+        *self.client.blocking_lock() = None;
+        *self.companion.blocking_lock() = None;
+    }
+
+    /// Async commands: never use blocking_lock on the runtime — await the mutex instead.
+    pub async fn reset_async(&self) {
+        self.clear_meta();
+        *self.client.lock().await = None;
+        *self.companion.lock().await = None;
     }
 }
 
@@ -69,7 +77,7 @@ pub async fn files_connect(
     user: Option<String>,
     password: Option<String>,
 ) -> Result<ConnectionView, String> {
-    state.files.reset();
+    state.files.reset_async().await;
     let (simulated, scenario, address) = {
         let g = lock(&state.session)?;
         let s = g.as_ref().ok_or("Select a console first.")?;
@@ -121,6 +129,7 @@ pub async fn files_connect(
             .map_err(err)?;
         *state.files.client.lock().await = Some(c);
         *lock(&state.files.target)? = Some((addr, user, pass));
+        state.files.cancel.store(false, Ordering::Relaxed);
     }
     let outcome = match &fact {
         FtpFact::Connected { .. } => "connected",
@@ -150,7 +159,7 @@ pub async fn files_disconnect(state: State<'_, AppState>) -> Result<ConnectionVi
     if let Some(c) = state.files.client.lock().await.take() {
         c.quit().await;
     }
-    state.files.reset();
+    state.files.reset_async().await;
     let mut g = lock(&state.session)?;
     let s = g.as_mut().ok_or("Select a console first.")?;
     s.facts.ftp = FtpFact::NotProbed;
@@ -373,35 +382,60 @@ pub async fn files_apply<R: tauri::Runtime>(
             drop(g);
             // Promote any pre-change copy into a real, verifiable backup (manifest + checksum).
             let mut backup_id = None;
+            let mut promote_note = String::new();
             if let (
                 Some(path),
                 RemoteOp::Upload { remote, .. } | RemoteOp::Delete { path: remote, .. },
             ) = (&outcome.backup, &plan.op)
             {
-                if let Ok(data) = std::fs::read(path) {
-                    let root = paths::data_dir().ok_or("no data dir")?.join("backups");
-                    let m = bk::create(
-                        &root,
-                        &format!("Before change: {remote}"),
-                        vec![bk::NewItem {
-                            category: bk::Category::RemoteFile,
-                            original: remote.clone(),
-                            data,
-                        }],
-                        ps4studio_core::db::now(),
-                    )
-                    .map_err(err)?;
-                    backup_id = Some(m.id);
+                match std::fs::read(path) {
+                    Ok(data) => match paths::data_dir() {
+                        Some(data_dir) => match bk::create(
+                            &data_dir.join("backups"),
+                            &format!("Before change: {remote}"),
+                            vec![bk::NewItem {
+                                category: bk::Category::RemoteFile,
+                                original: remote.clone(),
+                                data,
+                            }],
+                            ps4studio_core::db::now(),
+                        ) {
+                            Ok(m) => {
+                                backup_id = Some(m.id);
+                                let _ = std::fs::remove_dir_all(&tmp);
+                            }
+                            Err(e) => {
+                                // Console write already succeeded — keep tmp and do not imply rollback.
+                                promote_note = format!(
+                                    " Local recovery copy left at {} (could not promote: {e}).",
+                                    tmp.display()
+                                );
+                            }
+                        },
+                        None => {
+                            promote_note = format!(
+                                " Local recovery copy left at {} (no data directory).",
+                                tmp.display()
+                            );
+                        }
+                    },
+                    Err(e) => {
+                        promote_note = format!(
+                            " Local recovery copy left at {} (could not read: {e}).",
+                            tmp.display()
+                        );
+                    }
                 }
+            } else {
+                let _ = std::fs::remove_dir_all(&tmp);
             }
-            let _ = std::fs::remove_dir_all(&tmp);
             if let Some(s) = lock(&state.session)?.as_mut() {
                 if let FtpFact::Connected { writable } = &mut s.facts.ftp {
                     *writable = Some(true);
                 }
             }
             let detail = format!(
-                "{} | recovery: {}",
+                "{} | recovery: {}{promote_note}",
                 outcome.lines.join("; "),
                 outcome.recovery
             );
@@ -422,8 +456,25 @@ pub async fn files_apply<R: tauri::Runtime>(
         Err(e) => {
             *g = None; // connection may be poisoned; reconnect on next use
             drop(g);
-            let _ = std::fs::remove_dir_all(&tmp);
             let msg = e.to_string();
+            // Keep any pre-change local copy; a mid-apply failure may already have changed the console.
+            let has_local = tmp
+                .exists()
+                .then(|| std::fs::read_dir(&tmp).ok())
+                .flatten()
+                .is_some_and(|mut d| d.next().is_some());
+            let recovery = if has_local {
+                format!(
+                    "A local recovery copy may still be at {}. Check the console file list — the change may be partial. Plan recovery: {}",
+                    tmp.display(),
+                    plan.recovery
+                )
+            } else {
+                format!(
+                    "Check the console file list — the change may be partial. Recovery: {}",
+                    plan.recovery
+                )
+            };
             if msg.contains("550") {
                 if let Some(s) = lock(&state.session)?.as_mut() {
                     if let FtpFact::Connected { writable } = &mut s.facts.ftp {
@@ -434,10 +485,7 @@ pub async fn files_apply<R: tauri::Runtime>(
             lock(&state.db)?
                 .audit("files_apply", &desc, &msg, "failed")
                 .map_err(err)?;
-            Err(format!(
-                "{msg}. Nothing further was changed; check the console file list. Recovery: {}",
-                plan.recovery
-            ))
+            Err(format!("{msg}. {recovery}"))
         }
     }
 }
@@ -498,7 +546,7 @@ pub async fn files_download<R: tauri::Runtime>(
 // ---------------------------------------------------------------------------------------------
 
 use ps4studio_console_adapters::companion::{Client as CompanionClient, CompanionError};
-use ps4studio_core::capability::CompanionFact;
+use ps4studio_core::capability::{evaluate, Capability, CompanionFact, Status};
 
 #[tauri::command]
 pub async fn companion_connect(
@@ -596,6 +644,18 @@ pub async fn companion_connect(
 
 #[tauri::command]
 pub async fn companion_send_theme(state: State<'_, AppState>, id: String) -> Result<(), String> {
+    {
+        let g = lock(&state.session)?;
+        let s = g.as_ref().ok_or("Select a console first.")?;
+        let ok = evaluate(&s.facts).iter().any(|c| {
+            c.capability == Capability::CompanionThemeManagement && c.status == Status::Available
+        });
+        if !ok {
+            return Err(
+                "Theme transfer needs a paired companion that advertises theme support.".into(),
+            );
+        }
+    }
     let theme = ps4studio_core::themes::ThemeStore::new(
         paths::data_dir().ok_or("no data directory")?.join("themes"),
     )

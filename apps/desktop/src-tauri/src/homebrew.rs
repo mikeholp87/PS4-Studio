@@ -193,8 +193,48 @@ pub async fn hb_verify(state: State<'_, AppState>, name: String) -> Result<HashR
 /// Builds the upload operation for the confirmed flow. Only allowed when the checksum has matched
 /// the manifest OR the caller acknowledges an unverified package.
 #[tauri::command]
-pub fn hb_upload_op(state: State<AppState>, name: String) -> Result<RemoteOp, String> {
+pub async fn hb_upload_op(
+    state: State<'_, AppState>,
+    name: String,
+    acknowledge_unverified: bool,
+) -> Result<RemoteOp, String> {
     let path = pkg_path(&state, &name)?;
+    let side = path.with_file_name(format!("{name}.json"));
+    let expected = std::fs::read(&side)
+        .ok()
+        .and_then(|b| parse_sidecar(&b).ok())
+        .map(|m| m.sha256.to_lowercase());
+    let hash_path = path.clone();
+    let sha = tauri::async_runtime::spawn_blocking(move || -> std::io::Result<String> {
+        let mut f = std::fs::File::open(hash_path)?;
+        let mut h = Sha256::new();
+        let mut buf = vec![0u8; 1 << 20];
+        loop {
+            let n = f.read(&mut buf)?;
+            if n == 0 {
+                break;
+            }
+            h.update(&buf[..n]);
+        }
+        Ok(h.finalize().iter().map(|b| format!("{b:02x}")).collect())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|e| e.to_string())?;
+    match &expected {
+        Some(e) if *e == sha => {}
+        Some(_) => {
+            return Err(
+                "Checksum does not match the manifest. Refusing to copy this package.".into(),
+            )
+        }
+        None if acknowledge_unverified => {}
+        None => {
+            return Err(
+                "Package is unverified. Verify the checksum, or acknowledge the risk.".into(),
+            )
+        }
+    }
     Ok(RemoteOp::Upload {
         local: path.display().to_string(),
         remote: format!("/data/pkg/{name}"),

@@ -69,23 +69,24 @@ export const FONT_STACKS = {
 /** Focus movement on a grid of `count` tiles with `cols` columns. Pure; used by keyboard and gamepad. */
 export function moveFocus(index: number, dir: 'left' | 'right' | 'up' | 'down', count: number, cols: number, wrap: boolean): number {
   if (count === 0) return 0
-  const row = Math.floor(index / cols)
-  const col = index % cols
-  const rows = Math.ceil(count / cols)
+  const safeCols = Math.max(1, Math.floor(cols) || 1)
+  const row = Math.floor(index / safeCols)
+  const col = index % safeCols
+  const rows = Math.ceil(count / safeCols)
   let r = row, c = col
   if (dir === 'left') c--
   if (dir === 'right') c++
   if (dir === 'up') r--
   if (dir === 'down') r++
   if (wrap) {
-    if (c < 0) c = cols - 1
-    if (c >= cols) c = 0
+    if (c < 0) c = safeCols - 1
+    if (c >= safeCols) c = 0
     if (r < 0) r = rows - 1
     if (r >= rows) r = 0
   }
-  c = Math.max(0, Math.min(cols - 1, c))
+  c = Math.max(0, Math.min(safeCols - 1, c))
   r = Math.max(0, Math.min(rows - 1, r))
-  let n = r * cols + c
+  let n = r * safeCols + c
   if (n >= count) n = wrap && (dir === 'right' || dir === 'down') ? 0 : dir === 'left' || dir === 'up' ? index : count - 1
   return n
 }

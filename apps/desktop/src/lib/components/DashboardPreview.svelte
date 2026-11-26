@@ -85,7 +85,7 @@
     ro.observe(box)
     clock = setInterval(() => (now = new Date()), 30_000)
     const on = (e: GamepadEvent) => (pad = e.gamepad.id.slice(0, 40))
-    const off = () => (pad = null)
+    const off = () => { pad = null; setActive(false) }
     window.addEventListener('gamepadconnected', on)
     window.addEventListener('gamepaddisconnected', off)
     return () => { window.removeEventListener('gamepadconnected', on); window.removeEventListener('gamepaddisconnected', off) }

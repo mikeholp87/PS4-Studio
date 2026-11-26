@@ -10,6 +10,8 @@ use std::sync::atomic::AtomicBool;
 
 pub const MAX_BACKUP_BYTES: u64 = 64 * 1024 * 1024;
 const PART_SUFFIX: &str = ".ps4studio-part";
+/// Temporary name for the previous file during overwrite (rename-swap; never DELE-before-RNTO).
+const BAK_SUFFIX: &str = ".ps4studio-bak";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
@@ -230,9 +232,27 @@ pub async fn apply(
             let mut f = tokio::fs::File::open(local).await?;
             let sent = c.upload(&mut f, &part, ctx.progress, ctx.cancel).await?;
             if plan.overwrites {
-                c.dele(&remote).await?;
+                // Rename-swap: keep the old file until the new name is in place. DELE-then-RNTO
+                // would leave nothing if rename failed after delete.
+                let bak = format!("{remote}{BAK_SUFFIX}");
+                if exists(c, &bak).await? {
+                    c.dele(&bak).await?;
+                }
+                c.rename(&remote, &bak).await?;
+                if let Err(e) = c.rename(&part, &remote).await {
+                    // Best-effort restore so a failed final rename does not leave only `.bak`.
+                    let _ = c.rename(&bak, &remote).await;
+                    return Err(e.into());
+                }
+                match c.dele(&bak).await {
+                    Ok(()) => {}
+                    Err(e) => lines.push(format!(
+                        "Warning: could not remove temporary backup {bak}: {e}"
+                    )),
+                }
+            } else {
+                c.rename(&part, &remote).await?;
             }
-            c.rename(&part, &remote).await?;
             lines.push(format!("Uploaded {sent} bytes to {remote}"));
             c.size(&remote).await? == Some(sent)
         }

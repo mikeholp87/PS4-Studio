@@ -307,6 +307,8 @@ pub async fn connect_profile(
     state: State<'_, AppState>,
     id: i64,
 ) -> Result<ConnectionView, String> {
+    // Drop prior FTP/companion sockets and plans before switching consoles (same as simulator).
+    state.files.reset_async().await;
     let mut profile = lock(&state.db)?
         .get_profile(id)
         .map_err(|e| e.to_string())?
@@ -349,7 +351,8 @@ pub async fn connect_profile(
                 Ok(_) => {
                     facts.discovery = Some(ps4studio_core::capability::DiscoveryFact {
                         via: ps4studio_core::capability::DiscoveryVia::RemotePlayPort,
-                        state: ps4studio_core::capability::HostState::Ready,
+                        // TCP 9295 proves presence only — Ready vs Standby is unknown.
+                        state: ps4studio_core::capability::HostState::Unknown,
                         host_name: None,
                         running_title: None,
                     });

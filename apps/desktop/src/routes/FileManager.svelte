@@ -24,6 +24,7 @@
   let ack = $state(false)
   let queue = $state<{ id: number; label: string; state: 'running' | 'done' | 'failed'; detail: string }[]>([])
   let qid = 0
+  let remoteReq = 0
 
   const conn = $derived(app.connection)
   const ftp = $derived(conn?.capabilities.find((c) => c.capability === 'homebrew.ftp_read'))
@@ -40,19 +41,22 @@
     if (l) { localPath = l.path; localParent = l.parent; local = l.entries; selLocal = null }
   }
   async function loadRemote(p: string) {
+    const req = ++remoteReq
     const r = await app.run(() => api.filesListRemote(p))
+    if (req !== remoteReq) return // ignore stale replies from a slower prior list
     if (r) { remotePath = p; remote = r; selRemote = null }
   }
   onMount(() => { loadLocal(null); if (connected) loadRemote('/') })
 
   async function connect() {
     busy = true
-    const c = await app.run(() => api.filesConnect(user || null, pass || null))
-    pass = ''
-    busy = false
-    if (c) { app.connection = c; if (c.capabilities.find((x) => x.capability === 'homebrew.ftp_read')?.status === 'available') await loadRemote('/') }
+    try {
+      const c = await app.run(() => api.filesConnect(user || null, pass || null))
+      pass = ''
+      if (c) { app.connection = c; if (c.capabilities.find((x) => x.capability === 'homebrew.ftp_read')?.status === 'available') await loadRemote('/') }
+    } finally { busy = false }
   }
-  async function disconnect() { const c = await app.run(api.filesDisconnect); if (c) { app.connection = c; remote = [] } }
+  async function disconnect() { const c = await app.run(api.filesDisconnect); if (c) { app.connection = c; remote = []; remotePath = '/' } }
   async function setLock() {
     const c = await app.run(() => api.filesSetWriteLock(true, ack))
     if (c) { app.connection = c; unlock = false; ack = false }
@@ -61,13 +65,15 @@
 
   async function download() {
     if (!sel || sel.kind !== 'file') return
+    const remoteFile = join(remotePath, sel.name)
+    const destDir = localPath
     const item = { id: ++qid, label: `Download ${sel.name}`, state: 'running' as const, detail: '' }
     queue.unshift(item)
-    const r = await app.run(() => api.filesDownload(join(remotePath, sel.name), localPath))
+    const r = await app.run(() => api.filesDownload(remoteFile, destDir))
     const q = queue.find((x) => x.id === item.id)!
     q.state = r ? 'done' : 'failed'
     q.detail = r ?? (app.error ?? 'failed')
-    if (r) await loadLocal(localPath)
+    if (r) await loadLocal(destDir)
   }
   function upload() { if (selLocal) plan = { kind: 'upload', local: join(localPath, selLocal), remote: join(remotePath, selLocal) } }
   function del() { if (sel) plan = { kind: 'delete', path: join(remotePath, sel.name), dir: sel.kind === 'dir' } }

@@ -87,4 +87,11 @@ describe('moveFocus', () => {
     expect(moveFocus(0, 'right', 0, 4, true)).toBe(0)
     expect(moveFocus(6, 'right', 7, 4, false)).toBe(6)
   })
+  it('treats non-positive columns as 1 (avoids Infinity/NaN indices)', () => {
+    // cols<=0 → single column: right stays on the same index without wrap; down advances.
+    expect(moveFocus(0, 'right', 3, 0, false)).toBe(0)
+    expect(Number.isFinite(moveFocus(0, 'right', 3, 0, false))).toBe(true)
+    expect(moveFocus(0, 'down', 3, -2, false)).toBe(1)
+    expect(moveFocus(1, 'down', 3, 0, false)).toBe(2)
+  })
 })

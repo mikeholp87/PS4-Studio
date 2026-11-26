@@ -21,7 +21,11 @@
   async function scan() { const r = await app.run(api.hbPickAndScan); if (r) { pkgs = r; checks = {} } }
   async function verify(name: string) { const r = await app.run(() => api.hbVerify(name)); if (r) checks[name] = r }
   async function saveTrusted() { await app.run(() => api.setSetting('trusted_publishers', trusted)); await scan() }
-  async function send(name: string) { const op = await app.run(() => api.hbUploadOp(name)); if (op) plan = op }
+  async function send(name: string) {
+    const ack = !!ackUnverified[name]
+    const op = await app.run(() => api.hbUploadOp(name, ack))
+    if (op) plan = op
+  }
   const sendReason = (p: PackageInfo) =>
     app.blocked('homebrew.ftp_read') ?? (!app.connection?.write_unlocked ? 'Enable changes in the File Manager first.' : checks[p.file]?.status === 'verified' || ackUnverified[p.file] ? null : 'Verify the checksum, or tick “I accept the risk” for an unverified package.')
   const when = (ts: number) => new Date(ts * 1000).toLocaleString()

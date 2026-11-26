@@ -23,7 +23,10 @@
     try { await api.companionSendTheme(themeId); msg = 'Theme sent. The companion stored it.' } catch (e) { problem = errText(e) }
     busy = false
   }
-  async function leave() { try { app.connection = await api.companionDisconnect() } catch { /* ignore */ } onclose() }
+  async function leave() {
+    try { app.connection = await api.companionDisconnect() } catch (e) { problem = errText(e); return }
+    onclose()
+  }
 </script>
 
 <Modal title="Send theme to the PS4 Studio companion" onclose={onclose}>

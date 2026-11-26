@@ -9,7 +9,7 @@
 | "A port is open but it did not complete an FTP handshake" | Something listens but it is not FTP. Not treated as a file service. |
 | "Writes are locked." | Use File Manager → Enable changes… (acknowledge FTP is unencrypted). Changes are only allowed inside `/data`. |
 | "That plan has expired or was already used." | Plans last 5 minutes and are single-use. Review the change again. |
-| Transfer failed midway | The connection is dropped and reopened; uploads use a `.ps4studio-part` file so the real file is never half-written. Check the console file list; recovery notes are in Backups → Operation history. |
+| Transfer failed midway | The connection is dropped and reopened; uploads use a `.ps4studio-part` file and overwrite via rename-swap (`.ps4studio-bak`), so the real name is never deleted before the new file is in place. Check the console file list; a local recovery copy may remain under a temp folder named in the error; Backups → Operation history has recovery notes. |
 | "the pairing code was rejected" (companion) | 3 wrong attempts lock pairing until the companion restarts. |
 | "Companion … uses protocol N; this app needs 1" | Update the companion or the app. |
 | Gamepad not detected in the preview | Press a button once so the browser exposes it; check `/dev/input` permissions. |
